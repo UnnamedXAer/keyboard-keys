@@ -1,44 +1,14 @@
 <script lang="ts">
-  import { stringToAppKeys } from '../../helpers/keys';
-  import { AppKey, type TextChar } from '../../models/key';
+  import type { TextChar } from '../../models/key';
+  import { KEYBOARD_KEYS } from '../../helpers/keys';
   import KeyBtn from './Key.svelte';
 
   export let activeChars: TextChar[];
   console.log(activeChars);
-
-  const keys = {
-    numbers: [...stringToAppKeys('`1234567890-='), new AppKey(8, 'backspace', 'Backspace')],
-    startWithTab: [
-      new AppKey(9, 'tab', 'Tab'),
-      ...stringToAppKeys('qwertyuiop[]'),
-      new AppKey(9, 'slash', '|\\')
-    ],
-    startWithCapsLock: [
-      new AppKey(9, 'capsLock', 'CapsLock'),
-      ...stringToAppKeys("asdfghjkl;'"),
-      new AppKey(13, 'enter', 'Enter')
-    ],
-    startWithShift: [
-      new AppKey(9, 'lShift', 'Shift'),
-      ...stringToAppKeys('zxcvbnm,./'),
-      new AppKey(13, 'rShift', 'Shift')
-    ],
-    startWithCtrl: [
-      new AppKey(9, 'lCtrl', 'Ctrl'),
-      // new AppKey(9, 'lFn', 'Fn'),
-      new AppKey(9, 'lWin', 'Win'),
-      new AppKey(9, 'lAlt', 'Alt'),
-      new AppKey(9, 'space', 'space'),
-      new AppKey(9, 'rAlt', 'Alt'),
-      new AppKey(9, 'rFn', 'Fn'),
-      // new AppKey(9, 'options', 'Opt'),
-      new AppKey(9, 'rCtrl', 'Ctrl')
-    ]
-  };
 </script>
 
 <div id="keyboard">
-  {#each Object.values(keys) as rowKeys}
+  {#each Object.values(KEYBOARD_KEYS) as rowKeys}
     <div class="row">
       {#each rowKeys as key}
         <KeyBtn

@@ -20,3 +20,11 @@ export enum CharState {
   correct = 'correct',
   wrong = 'wrong'
 }
+
+export type KeyEvent = {
+  charCode: number;
+  key: string;
+  shift: boolean;
+  ctrl: boolean;
+  alt: boolean;
+};

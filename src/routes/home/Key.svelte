@@ -2,9 +2,10 @@
   import type { AppKey } from 'src/models/key';
 
   export let key: AppKey;
+  export let active: boolean;
 </script>
 
-<div class={key.cssClass}>{key.label}</div>
+<div class="{key.cssClass} {active ? 'active' : ''}">{key.label}</div>
 
 <style>
   div {
@@ -13,6 +14,7 @@
     border: 1px solid #222;
     border-radius: 4px;
     box-shadow: 1px 2px 3px #ccc;
+	font-size: 1.4rem;
 
     text-align: center;
     display: grid;
@@ -50,5 +52,10 @@
   }
   .space {
     width: calc((var(--key-base-size) * 8));
+  }
+
+  .active {
+    background-color: #222;
+    color: #f4f4f4;
   }
 </style>

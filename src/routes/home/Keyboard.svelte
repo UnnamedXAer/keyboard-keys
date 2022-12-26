@@ -1,7 +1,10 @@
 <script lang="ts">
   import { stringToAppKeys } from '../../helpers/keys';
-  import { AppKey } from '../../models/key';
+  import { AppKey, type TextChar } from '../../models/key';
   import KeyBtn from './Key.svelte';
+
+  export let activeChars: TextChar[];
+  console.log(activeChars);
 
   const keys = {
     numbers: [...stringToAppKeys('`1234567890-='), new AppKey(8, 'backspace', 'Backspace')],
@@ -32,15 +35,16 @@
       new AppKey(9, 'rCtrl', 'Ctrl')
     ]
   };
-
-  console.log(keys);
 </script>
 
 <div id="keyboard">
   {#each Object.values(keys) as rowKeys}
     <div class="row">
       {#each rowKeys as key}
-        <KeyBtn {key} />
+        <KeyBtn
+          {key}
+          active={activeChars.length ? activeChars[0].char.charCodeAt(0) === key.keyCode : false}
+        />
       {/each}
     </div>
   {/each}

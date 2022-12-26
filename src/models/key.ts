@@ -9,3 +9,14 @@ export class AppKey {
     this.cssClass = cssClass;
   }
 }
+
+export type TextChar = {
+  char: string;
+  state: CharState;
+};
+
+export enum CharState {
+  untouched = 'untouched',
+  correct = 'correct',
+  wrong = 'wrong'
+}

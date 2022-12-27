@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { findNextCharPosition } from '../../helpers/keys';
+  import { findNextCharPosition, SPACE_SUBSTITUTE } from '../../helpers/keys';
   import { CharState, type KeyEvent, type TextChar } from '../../models/key';
   import Keyboard from './Keyboard.svelte';
   import Phrase from './Phrase.svelte';
@@ -10,7 +10,7 @@
       .split(' ')
       .map((x) => {
         return x
-          .concat('␣')
+          .concat(SPACE_SUBSTITUTE)
           .split('')
           .map((x, i) => ({
             char: x,
@@ -19,12 +19,12 @@
       });
   text.at(-1)?.pop();
 
-  console.log(text);
   let position = findNextCharPosition(text);
   let phraseEvent: KeyEvent | null;
 
-  function keyPressHandler(ev: KeyboardEvent) {
-    console.log(ev);
+  function keyDownHandler(ev: KeyboardEvent) {
+    ev.preventDefault();
+    // console.log('keydown', ev.key, ev.keyCode, ev.code);
     phraseEvent = {
       ctrl: ev.ctrlKey,
       alt: ev.altKey,
@@ -37,7 +37,10 @@
       return;
     }
 
-    if (text[position.x][position.y].char === phraseEvent.key) {
+    if (
+      text[position.x][position.y].char === phraseEvent.key ||
+      (text[position.x][position.y].char === SPACE_SUBSTITUTE && phraseEvent.key === ' ')
+    ) {
       text[position.x][position.y].state = CharState.correct;
     } else {
       text[position.x][position.y].state = CharState.wrong;
@@ -50,7 +53,7 @@
 
 <main>
   <section>
-    <Phrase {text} onKeyPress={keyPressHandler} />
+    <Phrase {text} onKeyDown={keyDownHandler} />
     <Keyboard activeChars={position !== null ? [text[position.x][position.y]] : []} />
   </section>
 </main>
@@ -58,7 +61,6 @@
 <style>
   section {
     max-width: 1600px;
-    background-color: thistle;
     display: flex;
     flex-direction: column;
     align-items: center;

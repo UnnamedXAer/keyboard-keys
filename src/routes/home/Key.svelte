@@ -14,7 +14,7 @@
     border: 1px solid #222;
     border-radius: 4px;
     box-shadow: 1px 2px 3px #ccc;
-	font-size: 1.4rem;
+    font-size: 1.4rem;
 
     text-align: center;
     display: grid;
@@ -27,7 +27,7 @@
   }
 
   .tab,
-  .slash {
+  .backSlash {
     width: calc((var(--key-base-size) * 1.5) + (var(--key-gap) * 1 / 2));
   }
   .capsLock {
@@ -47,11 +47,13 @@
   .lAlt,
   .lWin,
   .rAlt,
-  .rCtrl {
+  .rCtrl,
+  .contextMenu {
     width: calc((var(--key-base-size) * 1.5));
   }
   .space {
-    width: calc((var(--key-base-size) * 8));
+	flex: 1;
+    /* width: calc((var(--key-base-size) * 7.5) + (var(--key-gap))); */
   }
 
   .active {

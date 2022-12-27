@@ -1,20 +1,26 @@
 <script lang="ts">
-  import type { TextChar } from '../../models/key';
-  import { KEYBOARD_KEYS } from '../../helpers/keys';
+  import type { AppKey, TextChar } from '../../models/key';
+  import { KEYBOARD_KEYS, SPACE_SUBSTITUTE } from '../../helpers/keys';
   import KeyBtn from './Key.svelte';
 
   export let activeChars: TextChar[];
-  console.log(activeChars);
+  function isActive(key: AppKey): boolean {
+    if (activeChars[0].char.charCodeAt(0) === key.keyCode) {
+      return true;
+    }
+
+    if (activeChars[0].char === SPACE_SUBSTITUTE && key.keyCode === 32) {
+      return true;
+    }
+    return false;
+  }
 </script>
 
 <div id="keyboard">
   {#each Object.values(KEYBOARD_KEYS) as rowKeys}
     <div class="row">
       {#each rowKeys as key}
-        <KeyBtn
-          {key}
-          active={activeChars.length ? activeChars[0].char.charCodeAt(0) === key.keyCode : false}
-        />
+        <KeyBtn {key} active={activeChars.length ? isActive(key) : false} />
       {/each}
     </div>
   {/each}

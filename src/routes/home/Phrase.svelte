@@ -2,7 +2,7 @@
   import type { TextChar } from '../../models/key';
 
   export let text: TextChar[][];
-  export let onKeyPress: (event: KeyboardEvent) => void;
+  export let onKeyDown: (event: KeyboardEvent) => void;
 </script>
 
 <svelte:head>
@@ -13,7 +13,7 @@
 <section
   tabindex="0"
   aria-roledescription="contains text for the user to be typed on the keyboard, also visually indicates current position and correctness of users input"
-  on:keypress={onKeyPress}
+  on:keydown={onKeyDown}
 >
   {#each text as word}
     <span class="word">
@@ -32,17 +32,17 @@
     line-height: 1.3;
     position: relative;
     user-select: none;
-	text-align: center;
+    text-align: center;
   }
 
   section:not(:focus):before {
-    /* content: ''; */
+    content: '';
     position: absolute;
     left: 0;
     top: 0;
     right: 0;
     bottom: 0;
-    backdrop-filter: blur(0.11em);
+    backdrop-filter: blur(0.07em);
     margin: -20px;
   }
 

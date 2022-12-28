@@ -1,8 +1,14 @@
 <script lang="ts">
-  import type { TextChar } from '../../models/key';
+  import type { Content } from 'src/helpers/text';
+  import { onMount } from 'svelte';
+  import Cursor from './Cursor.svelte';
 
-  export let text: TextChar[][];
+  export let content: Content;
   export let onKeyDown: (event: KeyboardEvent) => void;
+  let focusableElement: HTMLElement;
+  onMount(() => {
+    focusableElement.focus();
+  });
 </script>
 
 <svelte:head>
@@ -10,22 +16,28 @@
 </svelte:head>
 
 <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
-<section
+<article
+  bind:this={focusableElement}
   tabindex="0"
   aria-roledescription="contains text for the user to be typed on the keyboard, also visually indicates current position and correctness of users input"
   on:keydown={onKeyDown}
 >
-  {#each text as word}
-    <span class="word">
-      {#each word as char}
-        <span class="char {char.state}">{char.char}</span>
-      {/each}
-    </span>
-  {/each}
-</section>
+  {#if content !== null}
+    <Cursor />
+    {#each content as word, x}
+      <span class="word">
+        {#each word as char, y}
+          <span class="char {char.state}">{char.char}</span>
+        {/each}
+      </span>
+    {/each}
+  {:else}
+    <p>error</p>
+  {/if}
+</article>
 
 <style>
-  section {
+  article {
     margin: 2rem 2rem;
     font-size: 4rem;
     letter-spacing: 0.25rem;
@@ -35,7 +47,7 @@
     text-align: center;
   }
 
-  section:not(:focus):before {
+  article:not(:focus):before {
     content: '';
     position: absolute;
     left: 0;

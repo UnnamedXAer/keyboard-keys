@@ -34,7 +34,11 @@ export function stringToAppKeys(txt: string): AppKey[] {
   return txt.split('').map((x) => new AppKey(x.charCodeAt(0)));
 }
 
-export function findNextCharPosition(text: TextChar[][]): { x: number; y: number } | null {
+export function findNextCharPosition(text: TextChar[][] | null): { x: number; y: number } | null {
+  if (text === null) {
+    return null;
+  }
+
   for (let x = 0; x < text.length; x++) {
     const word = text[x];
     for (let y = 0; y < word.length; y++) {

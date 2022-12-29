@@ -52,7 +52,7 @@
     width: calc((var(--key-base-size) * 1.5));
   }
   .space {
-	flex: 1;
+    flex: 1;
     /* width: calc((var(--key-base-size) * 7.5) + (var(--key-gap))); */
   }
 

@@ -6,7 +6,7 @@ export const KEYBOARD_KEYS = {
   numbers: [...stringToAppKeys('`1234567890-='), new AppKey(8, 'backspace', 'Backspace')],
   startWithTab: [
     new AppKey(9, 'tab', 'Tab'),
-    ...stringToAppKeys('qwertyuiop[]\\'),
+    ...stringToAppKeys('qwertyuiop[]'),
     new AppKey(220, 'backSlash', '|\\')
   ],
   startWithCapsLock: [

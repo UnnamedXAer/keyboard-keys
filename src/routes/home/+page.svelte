@@ -6,7 +6,6 @@
   import { loadContent, type Content } from '../../helpers/text';
 
   export let data: { content: Content };
-  console.log('data', data);
   let content: Content = data.content;
 
   async function updateContent() {
@@ -47,7 +46,7 @@
 <main>
   <button on:click={updateContent}>reset</button>
   <section>
-    <Phrase {content} onKeyDown={keyDownHandler} />
+    <Phrase {content} nextCharPosition={position} onKeyDown={keyDownHandler} />
     <Keyboard
       activeChars={position !== null && content !== null ? [content[position.x][position.y]] : []}
     />

@@ -1,0 +1,1 @@
+export const PHRASE_FONT_SIZE = 80 as const; // in px

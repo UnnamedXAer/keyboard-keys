@@ -34,16 +34,21 @@ export function stringToAppKeys(txt: string): AppKey[] {
   return txt.split('').map((x) => new AppKey(x.charCodeAt(0)));
 }
 
-export function findNextCharPosition(text: TextChar[][] | null): { x: number; y: number } | null {
+export function findNextCharPosition(
+  text: TextChar[][] | null
+): { wordIdx: number; charIdx: number } | null {
   if (text === null) {
     return null;
   }
 
-  for (let x = 0; x < text.length; x++) {
-    const word = text[x];
-    for (let y = 0; y < word.length; y++) {
-      if (word[y].state !== CharState.correct) {
-        return { x, y };
+  for (let wordIdx = 0; wordIdx < text.length; wordIdx++) {
+    const word = text[wordIdx];
+    for (let charIdx = 0; charIdx < word.length; charIdx++) {
+      if (word[charIdx].state === CharState.untouched) {
+        return {
+          wordIdx,
+          charIdx
+        };
       }
     }
   }

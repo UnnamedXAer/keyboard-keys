@@ -3,10 +3,10 @@
   import type { Content } from 'src/helpers/text';
   import { onMount } from 'svelte';
   import Cursor from './Cursor.svelte';
-  import type { CursorPosition } from './types';
+  import type { ContentPosition, CursorPosition } from './types';
 
   export let content: Content;
-  export let nextCharPosition: CursorPosition | null;
+  export let nextCharPosition: ContentPosition | null;
   export let onKeyDown: (event: KeyboardEvent) => void;
   let focusableElement: HTMLElement | undefined;
   let focusableElementRect: DOMRect | null = null;
@@ -16,38 +16,33 @@
     focusableElement?.focus();
   });
 
-  function updateCursorPos(content: Content, nextCharPosition: CursorPosition | null) {
+  function updateCursorPos(content: Content, nextCharPosition: ContentPosition | null) {
     if (
       content === null ||
       nextCharPosition === null ||
       !focusableElement ||
       focusableElementRect === null
     ) {
-      console.log(
-        `${content?.length} || ${nextCharPosition} || ${focusableElement} || ${focusableElementRect}`,
-        cursorPos
-      );
+      //   console.log(
+      //     `${content?.length} || ${nextCharPosition} || ${focusableElement} || ${focusableElementRect}`,
+      //     cursorPos
+      //   );
       cursorPos = { x: 0, y: 0 };
       return;
     }
 
-    // debugger
     const words = focusableElement.children;
-    const wordEl = words[nextCharPosition.x + 1];
-    const targetEl = wordEl.children[nextCharPosition.y];
+    const wordEl = words[nextCharPosition.wordIdx + 1];
+    const targetEl = wordEl.children[nextCharPosition.charIdx];
     if (!targetEl) {
       cursorPos = { x: 0, y: 0 };
       return;
     }
     const rect = targetEl.getBoundingClientRect();
-    // console.log(rect);
     cursorPos = {
       x: rect.left - focusableElementRect.left - PHRASE_FONT_SIZE,
       y: rect.top - focusableElementRect.top
     };
-
-    console.log(cursorPos, rect, focusableElementRect);
-    // debugger
   }
 
   $: {

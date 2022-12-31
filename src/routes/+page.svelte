@@ -1,6 +1,5 @@
-
 <main>
-	<a href="/home">keyboard here</a>
+  <a href="/home">keyboard here</a>
 </main>
 
 <style>

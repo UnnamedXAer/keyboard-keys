@@ -3,6 +3,6 @@ import type { PageLoad } from './$types';
 
 export const load: PageLoad = ({ fetch }) => {
   return {
-    content: loadContent(fetch)
+    content: loadContent(fetch),
   };
 };

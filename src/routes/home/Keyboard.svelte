@@ -1,7 +1,8 @@
 <script lang="ts">
   import type { AppKey, TextChar } from '../../models/key';
-  import { KEYBOARD_KEYS, SPACE_SUBSTITUTE } from '../../helpers/keys';
+  import { KEYBOARD_KEYS } from '../../helpers/keys';
   import KeyBtn from './Key.svelte';
+  import { SPACE_SUBSTITUTE_CHAR, VISIBLE_KEYS_TABLE } from '../../constants/constants';
 
   export let activeChars: TextChar[];
   function isActive(key: AppKey): boolean {
@@ -9,7 +10,7 @@
       return true;
     }
 
-    if (activeChars[0].char === SPACE_SUBSTITUTE && key.keyCode === 32) {
+    if (activeChars[0].char === SPACE_SUBSTITUTE_CHAR && key.keyCode === VISIBLE_KEYS_TABLE.Space) {
       return true;
     }
     return false;
@@ -32,10 +33,8 @@
     font-style: normal;
     font-weight: 400;
     src: local('Source Sans Pro'),
-      /* Chrome 26+, Opera 23+, Firefox 39+ */
-        url('./fonts/source-sans-pro-v21-latin-ext_latin-regular.woff2') format('woff2'),
-      /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
-        url('./fonts/source-sans-pro-v21-latin-ext_latin-regular.woff') format('woff');
+      url('./fonts/source-sans-pro-v21-latin-ext_latin-regular.woff2') format('woff2'),
+      url('./fonts/source-sans-pro-v21-latin-ext_latin-regular.woff') format('woff');
   }
 
   #keyboard {
@@ -47,7 +46,6 @@
         (var(--border-width) * 2)
     );
 
-    /* pointer-events: none; */
     user-select: none;
 
     font-family: 'Source Sans Pro';

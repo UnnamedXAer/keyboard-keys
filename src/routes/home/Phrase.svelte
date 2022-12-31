@@ -11,7 +11,7 @@
   let focusableElement: HTMLElement | undefined;
   let focusableElementRect: DOMRect | null = null;
 
-  let cursorPos: CursorPosition = { x: 0, y: 0 };
+  let cursorPos: CursorPosition = { x: 0, y: 0 }; // TODO: cursor's position breaks after new phrase is loaded
   onMount(() => {
     focusableElement?.focus();
   });
@@ -23,25 +23,23 @@
       !focusableElement ||
       focusableElementRect === null
     ) {
-      //   console.log(
-      //     `${content?.length} || ${nextCharPosition} || ${focusableElement} || ${focusableElementRect}`,
-      //     cursorPos
-      //   );
       cursorPos = { x: 0, y: 0 };
       return;
     }
 
     const words = focusableElement.children;
     const wordEl = words[nextCharPosition.wordIdx + 1];
-    const targetEl = wordEl.children[nextCharPosition.charIdx];
-    if (!targetEl) {
+
+    const targetEl = wordEl.children.item(nextCharPosition.charIdx) as HTMLElement | null;
+    if (targetEl === null) {
       cursorPos = { x: 0, y: 0 };
       return;
     }
+    console.log(targetEl.innerText);
     const rect = targetEl.getBoundingClientRect();
     cursorPos = {
-      x: rect.left - focusableElementRect.left - PHRASE_FONT_SIZE,
-      y: rect.top - focusableElementRect.top
+      x: rect.left - focusableElementRect.left,
+      y: rect.top - focusableElementRect.top,
     };
   }
 
@@ -63,6 +61,7 @@
 <section>
   <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
   <article
+    id="phrase_focusable"
     bind:this={focusableElement}
     style="font-size: {PHRASE_FONT_SIZE}px;"
     tabindex="0"

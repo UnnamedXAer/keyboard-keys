@@ -1,5 +1,5 @@
-import { CharState, type TextChar } from '../models/key';
-import { SPACE_SUBSTITUTE } from './keys';
+import { CharState, SPACE_CHAR, SPACE_SUBSTITUTE_CHAR } from '../constants/constants';
+import type { TextChar } from '../models/key';
 
 export type Content = TextChar[][] | null;
 
@@ -9,23 +9,20 @@ export function parseText(content: string | null): Content {
   }
   content = content.trim();
 
-  // TODO: remove
-  //   content = content.substr(5, 15);
-
   const words = content
     .toLowerCase()
-    .replaceAll(/[^\w\s-.,()]/g, ' ')
-    .replaceAll(/\s{2,}/g, ' ')
-    .split(' ');
+    .replaceAll(/[^\w\s-.,()]/g, SPACE_CHAR)
+    .replaceAll(/\s{2,}/g, SPACE_CHAR)
+    .split(SPACE_CHAR);
 
   const text: NonNullable<Content> = words.map((word, wordIdx) => {
     const chars: string[] = word.split('');
     if (wordIdx < words.length - 1) {
-      chars.push(SPACE_SUBSTITUTE);
+      chars.push(SPACE_SUBSTITUTE_CHAR);
     }
     return chars.map((char) => ({
       char,
-      state: CharState.untouched
+      state: CharState.untouched,
     }));
   });
 

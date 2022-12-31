@@ -1,13 +1,16 @@
 <script lang="ts">
   import { PHRASE_FONT_SIZE } from '../../constants/constants';
   import type { CursorPosition } from './types';
+  const height = PHRASE_FONT_SIZE * 0.9;
+  const topOffset = PHRASE_FONT_SIZE * 0.15;
 
-
-  export let pos: CursorPosition;
+  export let pos: CursorPosition | null;
 </script>
 
 <!-- <div style="transform: translate({pos.x}px, {pos.y}px);" /> -->
-<div style="height:{PHRASE_FONT_SIZE}px; left: {pos.x}px; top: {pos.y}px;" />
+{#if pos !== null}
+  <div style="height:{height}px; left: {pos.x}px; top: {pos.y + topOffset}px;" />
+{/if}
 
 <style>
   div {
@@ -18,6 +21,6 @@
     width: 0.2rem;
     height: 4rem;
     background-color: #222;
-    transition-duration: 0.5s;
+    transition-duration: 0.3s;
   }
 </style>

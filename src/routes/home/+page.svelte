@@ -1,11 +1,18 @@
 <script lang="ts">
-  import { findNextCharPosition, SPACE_SUBSTITUTE } from '../../helpers/keys';
-  import { CharState, type KeyEvent, type TextChar } from '../../models/key';
+  import { findNextCharPosition } from '../../helpers/keys';
   import Keyboard from './Keyboard.svelte';
   import Phrase from './Phrase.svelte';
   import { loadContent, type Content } from '../../helpers/text';
-  import { VISIBLE_KEYS, VISIBLE_KEYS_TABLE, type VisibleKeys } from '../../constants/constants';
+  import {
+    CharState,
+    SPACE_CHAR,
+    SPACE_SUBSTITUTE_CHAR,
+    VISIBLE_KEYS,
+    VISIBLE_KEYS_TABLE,
+    type VisibleKeys,
+  } from '../../constants/constants';
   import type { ContentPosition } from './types';
+  import type { KeyEvent } from 'src/models/key';
 
   export let data: { content: Content };
   let content: Content = data.content;
@@ -13,19 +20,24 @@
 
   async function updateContent() {
     content = await loadContent(fetch);
-    updatePosition(content);
+    updatePosition(content, position);
   }
 
-  function updatePosition(content: Content) {
-    position = findNextCharPosition(content);
+  function updatePosition(content: Content, oldPosition: typeof position) {
+    requestAnimationFrame(() => {
+      position = findNextCharPosition(content);
+      console.log('updated pos:', position);
+      if (position === null && oldPosition !== null) {
+        updateContent();
+      }
+    });
   }
 
-  updatePosition(content);
+  updatePosition(content, position);
 
   let phraseEvent: KeyEvent | null;
 
   function keyDownHandler(ev: KeyboardEvent) {
-    // console.log(ev);
     if (ev.ctrlKey && ev.keyCode === 13) {
       updateContent();
       return;
@@ -40,7 +52,7 @@
       alt: ev.altKey,
       shift: ev.shiftKey,
       charCode: ev.charCode,
-      key: ev.key
+      key: ev.key,
     };
 
     if (position === null) {
@@ -48,43 +60,38 @@
     }
 
     if (ev.keyCode === VISIBLE_KEYS_TABLE.Backspace) {
-      // debugger
       if (position.charIdx > 0) {
-        position.charIdx--;
-        content![position.wordIdx][position.charIdx].state = CharState.untouched;
-        return;
+        content![position.wordIdx][position.charIdx - 1].state = CharState.untouched;
+      } else if (position.wordIdx > 0) {
+        content![position.wordIdx - 1][content![position.wordIdx - 1].length - 1].state =
+          CharState.untouched;
       }
-
-      if (position.wordIdx > 0) {
-        position.wordIdx--;
-        position.charIdx = content![position.wordIdx].length - 1;
-        content![position.wordIdx][position.charIdx].state = CharState.untouched;
-        return;
-      }
-      return;
-    }
-
-    if (
+    } else if (
       content![position.wordIdx][position.charIdx].char === phraseEvent.key ||
-      (content![position.wordIdx][position.charIdx].char === SPACE_SUBSTITUTE &&
-        phraseEvent.key === ' ')
+      (content![position.wordIdx][position.charIdx].char === SPACE_SUBSTITUTE_CHAR &&
+        phraseEvent.key === SPACE_CHAR)
     ) {
       content![position.wordIdx][position.charIdx].state = CharState.correct;
     } else {
       content![position.wordIdx][position.charIdx].state = CharState.wrong;
     }
-    position = findNextCharPosition(content);
 
-    if (position === null) {
-      updateContent();
-    }
+    updatePosition(content, position);
   }
+
+  const buttonClickHandler = () => {
+    updateContent();
+    requestAnimationFrame(() => {
+      document.querySelector<HTMLElement>('#phrase_focusable')?.focus();
+      requestAnimationFrame(() => console.log(document.activeElement));
+    });
+  };
 </script>
 
 <h1>hi there</h1>
 
 <main>
-  <button on:click={updateContent}>reset</button>
+  <button on:click={buttonClickHandler}>reset</button>
   <section>
     <Phrase {content} nextCharPosition={position} onKeyDown={keyDownHandler} />
     <Keyboard
@@ -98,6 +105,7 @@
 <style>
   section {
     max-width: 1600px;
+    min-width: var(--keyboard-width);
     display: flex;
     flex-direction: column;
     align-items: center;

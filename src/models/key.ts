@@ -1,3 +1,5 @@
+import type { CharState } from 'src/constants/constants';
+
 export class AppKey {
   readonly keyCode: number;
   readonly label: string;
@@ -14,12 +16,6 @@ export type TextChar = {
   char: string;
   state: CharState;
 };
-
-export enum CharState {
-  untouched = 'untouched',
-  correct = 'correct',
-  wrong = 'wrong'
-}
 
 export type KeyEvent = {
   charCode: number;

@@ -1,4 +1,16 @@
+export enum CharState {
+  untouched = 'untouched',
+  correct = 'correct',
+  wrong = 'wrong',
+  corrected = 'corrected',
+  backspacedWrong = 'backspacedWrong',
+}
+
 export const PHRASE_FONT_SIZE = 80 as const; // in px
+
+export const SPACE_SUBSTITUTE_CHAR = '␣';
+export const SPACE_CHAR = ' ';
+export const untypedStatuses = [CharState.untouched, CharState.backspacedWrong];
 
 export const VISIBLE_KEYS_TABLE = {
   Backquote: 192,
@@ -63,7 +75,7 @@ export const VISIBLE_KEYS_TABLE = {
   Numpad3: 34,
   Numpad0: 45,
   Space: 32,
-  Backspace: 8
+  Backspace: 8,
 } as const;
 
 export type VisibleKeys = [keyof typeof VISIBLE_KEYS_TABLE];

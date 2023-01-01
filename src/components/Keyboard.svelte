@@ -1,8 +1,8 @@
 <script lang="ts">
-  import type { AppKey, TextChar } from '../../models/key';
-  import { KEYBOARD_KEYS } from '../../helpers/keys';
+  import type { AppKey, TextChar } from '../models/key';
+  import { KEYBOARD_KEYS } from '../helpers/keys';
   import KeyBtn from './Key.svelte';
-  import { SPACE_SUBSTITUTE_CHAR, VISIBLE_KEYS_TABLE } from '../../constants/constants';
+  import { SPACE_SUBSTITUTE_CHAR, VISIBLE_KEYS_TABLE } from '../constants/constants';
 
   export let activeChars: TextChar[];
   function isActive(key: AppKey): boolean {

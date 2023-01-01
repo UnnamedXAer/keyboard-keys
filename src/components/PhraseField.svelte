@@ -1,12 +1,13 @@
 <script lang="ts">
-  import { PHRASE_FONT_SIZE } from '../../constants/constants';
-  import type { Content } from 'src/helpers/text';
+  import { PHRASE_FONT_SIZE } from '../constants/constants';
+  import type { Phrase } from 'src/helpers/text';
   import { onMount } from 'svelte';
   import Cursor from './Cursor.svelte';
-  import type { ContentPosition, CursorPosition } from './types';
+  import type { PhrasePosition, CursorPosition } from '../routes/types';
 
-  export let content: Content;
-  export let nextCharPosition: ContentPosition | null;
+  export let error: String | null;
+  export let phrase: Phrase | null;
+  export let nextCharPosition: PhrasePosition | null;
   export let onKeyDown: (event: KeyboardEvent) => void;
   let focusableElement: HTMLElement | undefined;
   let focusableElementRect: DOMRect | null = null;
@@ -16,9 +17,9 @@
     focusableElement?.focus();
   });
 
-  function updateCursorPos(content: Content, nextCharPosition: ContentPosition | null) {
+  function updateCursorPos(phrase: Phrase | null, nextCharPosition: PhrasePosition | null) {
     if (
-      content === null ||
+      phrase === null ||
       nextCharPosition === null ||
       !focusableElement ||
       focusableElementRect === null
@@ -35,7 +36,7 @@
       cursorPos = { x: 0, y: 0 };
       return;
     }
-    console.log(targetEl.innerText);
+
     const rect = targetEl.getBoundingClientRect();
     cursorPos = {
       x: rect.left - focusableElementRect.left,
@@ -44,7 +45,7 @@
   }
 
   $: {
-    updateCursorPos(content, nextCharPosition);
+    updateCursorPos(phrase, nextCharPosition);
   }
 
   $: {
@@ -68,9 +69,11 @@
     aria-roledescription="contains text for the user to be typed on the keyboard, also visually indicates current position and correctness of users input"
     on:keydown={onKeyDown}
   >
-    {#if content !== null}
+    {#if error !== null}
+      <p>Error: {error}</p>
+    {:else if phrase !== null}
       <Cursor pos={cursorPos} />
-      {#each content as word, x}
+      {#each phrase as word, x}
         <span class="word">
           {#each word as char, y}
             <span class="char {char.state}">{char.char}</span>
@@ -78,7 +81,7 @@
         </span>
       {/each}
     {:else}
-      <p>error</p>
+      <p style="font-size: 2rem;">There some problem, please try to refresh the page.</p>
     {/if}
   </article>
 </section>

@@ -1,5 +1,6 @@
 import { untypedStatuses } from '../constants/constants';
-import { AppKey, type TextChar } from '../models/key';
+import { AppKey } from '../models/key';
+import type { Phrase } from './text';
 
 export const KEYBOARD_KEYS = {
   numbers: [...stringToAppKeys('`1234567890-='), new AppKey(8, 'backspace', 'Backspace')],
@@ -34,14 +35,14 @@ export function stringToAppKeys(txt: string): AppKey[] {
 }
 
 export function findNextCharPosition(
-  content: TextChar[][] | null
+  phrase: Phrase | null
 ): { wordIdx: number; charIdx: number } | null {
-  if (content === null) {
+  if (phrase === null) {
     return null;
   }
 
-  for (let wordIdx = 0; wordIdx < content.length; wordIdx++) {
-    const word = content[wordIdx];
+  for (let wordIdx = 0; wordIdx < phrase.length; wordIdx++) {
+    const word = phrase[wordIdx];
     for (let charIdx = 0; charIdx < word.length; charIdx++) {
       if (untypedStatuses.includes(word[charIdx].state)) {
         return {

@@ -1,6 +1,8 @@
 <script lang="ts">
-  import { PHRASE_FONT_SIZE } from '../../constants/constants';
-  import type { CursorPosition } from './types';
+  import { PHRASE_FONT_SIZE } from '../constants/constants';
+  import type { CursorPosition } from 'src/routes/home/types';
+
+
   const height = PHRASE_FONT_SIZE * 0.9;
   const topOffset = PHRASE_FONT_SIZE * 0.15;
 

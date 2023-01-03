@@ -6,8 +6,6 @@ export enum CharState {
   backspacedWrong = 'backspacedWrong',
 }
 
-export const PHRASE_FONT_SIZE = 80 as const; // in px
-
 export const SPACE_SUBSTITUTE_CHAR = '␣';
 export const SPACE_CHAR = ' ';
 export const untypedStatuses = [CharState.untouched, CharState.backspacedWrong];

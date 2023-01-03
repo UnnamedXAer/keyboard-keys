@@ -1,17 +1,14 @@
 <script lang="ts">
-  import { PHRASE_FONT_SIZE } from '../constants/constants';
   import type { CursorPosition } from '../routes/types';
 
-  const height = PHRASE_FONT_SIZE;
-  const topOffset = PHRASE_FONT_SIZE * 0.1;
 
   export let pos: CursorPosition | null;
   export let isPhraseStarted: boolean;
 </script>
 
 <div
-  style="opacity: {pos === null ? '0' : '1'}; height:{height}px; translate: {pos?.x ??
-    0}px {(pos?.y ?? 0) + topOffset}px;"
+  style="opacity: {pos === null ? '0' : '1'}; translate: {pos?.x ??
+    0}px {(pos?.y ?? 0)}px;"
   class:flashing={!isPhraseStarted}
 />
 
@@ -20,9 +17,9 @@
     will-change: translate, opacity;
     position: absolute;
     left: 0;
-    top: 0rem;
+    top: calc(var(--phrase-font-size) * 0.1);
     width: 0.2rem;
-    height: 4rem;
+    height: var(--phrase-font-size);
     opacity: 0;
     background-color: #222222;
     transition: all 250ms, opacity 300ms;

@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { PHRASE_FONT_SIZE } from '../constants/constants';
   import type { Phrase } from 'src/helpers/text';
   import { onMount } from 'svelte';
   import Cursor from './Cursor.svelte';
@@ -63,7 +62,6 @@
   <article
     id="phrase_focusable"
     bind:this={focusableElement}
-    style="font-size: {PHRASE_FONT_SIZE}px;"
     tabindex="0"
     aria-roledescription="contains text for the user to be typed on the keyboard, also visually indicates current position and correctness of users input"
     on:keydown={onKeyDown}
@@ -86,13 +84,16 @@
 </section>
 
 <style>
+  :root {
+    --phrase-font-size: 4rem;
+  }
   section {
-    position: relative;
+    min-height: calc(4 * var(--phrase-font-size) + 2 * 2rem);
   }
 
   article {
     margin: 2rem 2rem;
-    font-size: 4rem;
+    font-size: var(--phrase-font-size);
     letter-spacing: 0.25rem;
     line-height: 1.3;
     position: relative;

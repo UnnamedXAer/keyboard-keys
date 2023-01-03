@@ -14,7 +14,7 @@
     border: 1px solid #222;
     border-radius: 4px;
     box-shadow: 1px 2px 3px #ccc;
-    font-size: 1.4rem;
+    font-size: 1rem;
 
     text-align: center;
     display: grid;

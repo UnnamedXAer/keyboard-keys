@@ -10,22 +10,19 @@
   export let nextCharPosition: PhrasePosition | null;
   export let onKeyDown: (event: KeyboardEvent) => void;
   let focusableElement: HTMLElement | undefined;
-  let focusableElementRect: DOMRect | null = null;
 
-  let cursorPos: CursorPosition = { x: 0, y: 0 }; // TODO: cursor's position breaks after new phrase is loaded
+  let cursorPos: CursorPosition = { x: 0, y: 0 };
   onMount(() => {
     focusableElement?.focus();
   });
 
-  function updateCursorPos(phrase: Phrase | null, nextCharPosition: PhrasePosition | null) {
-    if (
-      phrase === null ||
-      nextCharPosition === null ||
-      !focusableElement ||
-      focusableElementRect === null
-    ) {
-      cursorPos = { x: 0, y: 0 };
-      return;
+  function getCursorPos(
+    phrase: Phrase | null,
+    nextCharPosition: PhrasePosition | null,
+    focusableElement?: HTMLElement
+  ): { x: number; y: number } {
+    if (phrase === null || nextCharPosition === null || !focusableElement) {
+      return { x: 0, y: 0 };
     }
 
     const words = focusableElement.children;
@@ -33,26 +30,26 @@
 
     const targetEl = wordEl.children.item(nextCharPosition.charIdx) as HTMLElement | null;
     if (targetEl === null) {
-      cursorPos = { x: 0, y: 0 };
-      return;
+      return { x: 0, y: 0 };
     }
 
-    const rect = targetEl.getBoundingClientRect();
-    cursorPos = {
-      x: rect.left - focusableElementRect.left,
-      y: rect.top - focusableElementRect.top,
+    return {
+      x: targetEl.offsetLeft,
+      y: targetEl.offsetTop,
     };
   }
 
   $: {
-    updateCursorPos(phrase, nextCharPosition);
-  }
-
-  $: {
-    if (focusableElement) {
-      focusableElementRect = focusableElement.getBoundingClientRect();
+    if (mounted) {
+      // TODO: can it be done without mounted?
+      requestAnimationFrame(() => {
+        cursorPos = getCursorPos(phrase, nextCharPosition, focusableElement);
+      });
     }
   }
+
+  let mounted = false;
+  onMount(() => (mounted = true));
 </script>
 
 <svelte:head>

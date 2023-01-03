@@ -16,11 +16,3 @@ export type TextChar = {
   char: string;
   state: CharState;
 };
-
-export type KeyEvent = {
-  charCode: number;
-  key: string;
-  shift: boolean;
-  ctrl: boolean;
-  alt: boolean;
-};

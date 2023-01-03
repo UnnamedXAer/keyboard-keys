@@ -11,10 +11,8 @@
     type VisibleKeys,
   } from '../constants/constants';
   import type { PhrasePosition } from './types';
-  import type { KeyEvent, TextChar } from 'src/models/key';
   import PhraseField from '../components/PhraseField.svelte';
   import type { PageData } from './$types';
-  import { onMount } from 'svelte';
 
   export let data: PageData;
   const futureContents: {
@@ -25,16 +23,12 @@
     phrases: [],
   };
   let content: Content | null = data.content;
-  let phrase: Phrase | null = null;
+  let phrase: Phrase | null = content?.phrase ?? null;
+  let position: PhrasePosition | null = findNextCharPosition(phrase);
   let error: String | null = null;
 
-  $: {
-    let error = phrase === null ? 'I do not have more phrases' : null;
-    console.log(phrase, error);
-  }
-  let position: PhrasePosition | null = null;
-  let mounted = false;
-  onMount(() => (mounted = true));
+  $: error =
+    futureContents.phrases.length == 0 && phrase === null ? 'I do not have more phrases' : null;
 
   async function updateContent() {
     content = await loadContent(fetch);
@@ -42,21 +36,12 @@
     updatePosition(phrase, position);
   }
 
-  let cntUpdatePosition = 0;
   function updatePosition(phrase: Phrase | null, oldPosition: typeof position) {
-    cntUpdatePosition++;
-    console.log(cntUpdatePosition);
-    // requestAnimationFrame(() => {
     position = findNextCharPosition(phrase);
-    // console.log('updated pos:', position);
     if (position === null && oldPosition !== null) {
       updateContent();
     }
   }
-
-  updatePosition(phrase, position);
-
-  let phraseEvent: KeyEvent | null; // TODO: remove or use
 
   function keyDownHandler(ev: KeyboardEvent) {
     if (ev.ctrlKey && ev.keyCode === 13) {
@@ -67,14 +52,6 @@
     if (!VISIBLE_KEYS.includes(ev.code as VisibleKeys[number])) {
       return;
     }
-
-    phraseEvent = {
-      ctrl: ev.ctrlKey,
-      alt: ev.altKey,
-      shift: ev.shiftKey,
-      charCode: ev.charCode,
-      key: ev.key,
-    };
 
     if (position === null) {
       return;
@@ -88,9 +65,9 @@
           CharState.untouched;
       }
     } else if (
-      phrase![position.wordIdx][position.charIdx].char === phraseEvent.key ||
+      phrase![position.wordIdx][position.charIdx].char === ev.key ||
       (phrase![position.wordIdx][position.charIdx].char === SPACE_SUBSTITUTE_CHAR &&
-        phraseEvent.key === SPACE_CHAR)
+        ev.key === SPACE_CHAR)
     ) {
       phrase![position.wordIdx][position.charIdx].state = CharState.correct;
     } else {
@@ -108,10 +85,7 @@
     });
   };
 
-  let activeChars: TextChar[] = [];
-  $: {
-    activeChars = position !== null && phrase ? [phrase[position.wordIdx][position.charIdx]] : [];
-  }
+  $: activeChars = position !== null && phrase ? [phrase[position.wordIdx][position.charIdx]] : [];
 </script>
 
 <h1>hi there</h1>

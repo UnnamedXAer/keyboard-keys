@@ -7,11 +7,12 @@
 
   export let error: String | null;
   export let phrase: Phrase | null;
+  export let isPhraseStarted: boolean;
   export let nextCharPosition: PhrasePosition | null;
   export let onKeyDown: (event: KeyboardEvent) => void;
   let focusableElement: HTMLElement | undefined;
+  let cursorPos: CursorPosition | null = null;
 
-  let cursorPos: CursorPosition = { x: 0, y: 0 };
   onMount(() => {
     focusableElement?.focus();
   });
@@ -20,9 +21,9 @@
     phrase: Phrase | null,
     nextCharPosition: PhrasePosition | null,
     focusableElement?: HTMLElement
-  ): { x: number; y: number } {
+  ): CursorPosition | null {
     if (phrase === null || nextCharPosition === null || !focusableElement) {
-      return { x: 0, y: 0 };
+      return null;
     }
 
     const words = focusableElement.children;
@@ -30,7 +31,7 @@
 
     const targetEl = wordEl.children.item(nextCharPosition.charIdx) as HTMLElement | null;
     if (targetEl === null) {
-      return { x: 0, y: 0 };
+      return null;
     }
 
     return {
@@ -43,7 +44,8 @@
     if (mounted) {
       // TODO: can it be done without mounted?
       requestAnimationFrame(() => {
-        cursorPos = getCursorPos(phrase, nextCharPosition, focusableElement);
+        const newPos = getCursorPos(phrase, nextCharPosition, focusableElement);
+        cursorPos = newPos;
       });
     }
   }
@@ -69,7 +71,7 @@
     {#if error !== null}
       <p>Error: {error}</p>
     {:else if phrase !== null}
-      <Cursor pos={cursorPos} />
+      <Cursor pos={cursorPos} {isPhraseStarted} />
       {#each phrase as word, x}
         <span class="word">
           {#each word as char, y}

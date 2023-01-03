@@ -2,27 +2,42 @@
   import { PHRASE_FONT_SIZE } from '../constants/constants';
   import type { CursorPosition } from '../routes/types';
 
-
-  const height = PHRASE_FONT_SIZE * 0.9;
-  const topOffset = PHRASE_FONT_SIZE * 0.15;
+  const height = PHRASE_FONT_SIZE;
+  const topOffset = PHRASE_FONT_SIZE * 0.1;
 
   export let pos: CursorPosition | null;
+  export let isPhraseStarted: boolean;
 </script>
 
-<!-- <div style="transform: translate({pos.x}px, {pos.y}px);" /> -->
-{#if pos !== null}
-  <div style="height:{height}px; left: {pos.x}px; top: {pos.y + topOffset}px;" />
-{/if}
+<div
+  style="opacity: {pos === null ? '0' : '1'}; height:{height}px; translate: {pos?.x ??
+    0}px {(pos?.y ?? 0) + topOffset}px;"
+  class:flashing={!isPhraseStarted}
+/>
 
 <style>
   div {
-    /* will-change: transform; */
+    will-change: translate, opacity;
     position: absolute;
     left: 0;
-    top: 0;
+    top: 0rem;
     width: 0.2rem;
     height: 4rem;
-    background-color: #222;
-    transition-duration: 0.3s;
+    opacity: 0;
+    background-color: #222222;
+    transition: all 250ms, opacity 300ms;
+  }
+
+  .flashing {
+    animation: caret-flashing-anim 500ms linear 0ms infinite alternate forwards;
+  }
+
+  @keyframes caret-flashing-anim {
+    from {
+      opacity: 0.2;
+    }
+    to {
+      opacity: 1;
+    }
   }
 </style>

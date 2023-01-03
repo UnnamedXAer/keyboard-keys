@@ -24,6 +24,7 @@
   };
   let content: Content | null = data.content;
   let phrase: Phrase | null = content?.phrase ?? null;
+  let isPhraseStarted: boolean = false;
   let position: PhrasePosition | null = findNextCharPosition(phrase);
   let error: String | null = null;
 
@@ -31,6 +32,7 @@
     futureContents.phrases.length == 0 && phrase === null ? 'I do not have more phrases' : null;
 
   async function updateContent() {
+    isPhraseStarted = false;
     content = await loadContent(fetch);
     phrase = content?.phrase ?? null;
     updatePosition(phrase, position);
@@ -74,6 +76,7 @@
       phrase![position.wordIdx][position.charIdx].state = CharState.wrong;
     }
 
+    isPhraseStarted ||= phrase![0][0].state !== CharState.untouched;
     updatePosition(phrase, position);
   }
 
@@ -91,9 +94,17 @@
 <h1>hi there</h1>
 
 <main>
+  <label for="isPhraseStarted">is Phrase Started</label>
+  <input type="checkbox" name="yes" id="isPhraseStarted" bind:checked={isPhraseStarted}>
   <button on:click={buttonClickHandler}>reset</button>
   <section>
-    <PhraseField {error} {phrase} nextCharPosition={position} onKeyDown={keyDownHandler} />
+    <PhraseField
+      {error}
+      {phrase}
+      {isPhraseStarted}
+      nextCharPosition={position}
+      onKeyDown={keyDownHandler}
+    />
     <Keyboard {activeChars} />
   </section>
 </main>

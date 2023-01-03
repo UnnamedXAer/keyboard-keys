@@ -5,7 +5,7 @@ export type Phrase = TextChar[][];
 export type Content = { phrase: Phrase; author: string };
 
 const MIN_LENGTH = 10;
-const MAX_LENGTH = 100;
+const MAX_LENGTH = 80;
 const PAGE_SIZE = 3;
 
 export function parseText(content: string): Phrase | null {
@@ -14,9 +14,11 @@ export function parseText(content: string): Phrase | null {
   }
   content = content.trim();
 
+  const throwOutEverythingElse = /[^'"?!;:/\\[{}\]\w\s-.,()]/g
+
   const words = content
     .toLowerCase()
-    .replaceAll(/[^\w\s-.,()]/g, SPACE_CHAR)
+    .replaceAll(throwOutEverythingElse, SPACE_CHAR)
     .replaceAll(/\s{2,}/g, SPACE_CHAR)
     .split(SPACE_CHAR);
 

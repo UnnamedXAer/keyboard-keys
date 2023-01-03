@@ -20,10 +20,20 @@
         padding: 0;
         background-color: #f4f4f4;
       }
+
+      #no-js {
+		padding: 1rem;
+        background-color: rgb(255, 131, 109);
       }
     </style>
   </head>
   <body data-sveltekit-preload-data="hover">
+    <noscript>
+      <div id="no-js">
+        Javascript is required 😵. Without js we cannot handle your input in a way that allow us to
+        track your progress.
+      </div>
+    </noscript>
     <div style="display: contents">%sveltekit.body%</div>
   </body>
 </html>

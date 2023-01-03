@@ -106,6 +106,7 @@
       {error}
       {phrase}
       {isPhraseStarted}
+      author={content?.author}
       nextCharPosition={position}
       onKeyDown={keyDownHandler}
     />

@@ -7,6 +7,7 @@
   export let error: String | null;
   export let phrase: Phrase | null;
   export let isPhraseStarted: boolean;
+  export let author: string | undefined;
   export let nextCharPosition: PhrasePosition | null;
   export let onKeyDown: (event: KeyboardEvent) => void;
   let focusableElement: HTMLElement | undefined;
@@ -80,12 +81,14 @@
     {:else}
       <p style="font-size: 2rem;">There some problem, please try to refresh the page.</p>
     {/if}
+    <address>{author}</address>
   </article>
 </section>
 
 <style>
   :root {
     --phrase-font-size: 4rem;
+    --inactive-color: #888888;
   }
   section {
     min-height: calc(4 * var(--phrase-font-size) + 2 * 2rem);
@@ -99,6 +102,7 @@
     position: relative;
     user-select: none;
     text-align: center;
+    outline: none;
   }
 
   article:not(:focus):before {
@@ -112,6 +116,16 @@
     margin: -20px;
   }
 
+  address {
+    position: absolute;
+    right: 1.5rem;
+    bottom: -1.5rem;
+    font-size: 0.9rem;
+    font-style: italic;
+    letter-spacing: normal;
+    color: var(--inactive-color);
+  }
+
   .word {
     display: inline-block;
   }
@@ -121,7 +135,7 @@
   }
 
   .char.untouched {
-    color: #888888;
+    color: var(--inactive-color);
   }
   .char.correct {
     color: #000000;

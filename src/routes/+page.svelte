@@ -94,10 +94,14 @@
 <h1>hi there</h1>
 
 <main>
-  <label for="isPhraseStarted">is Phrase Started</label>
-  <input type="checkbox" name="yes" id="isPhraseStarted" bind:checked={isPhraseStarted}>
-  <button on:click={buttonClickHandler}>reset</button>
-  <section>
+  <section id="controls">
+    <label for="isPhraseStarted">
+      is Phrase Started:
+      <input type="checkbox" name="yes" id="isPhraseStarted" bind:checked={isPhraseStarted} />
+    </label>
+    <button on:click={buttonClickHandler}>reset</button>
+  </section>
+  <section id="test">
     <PhraseField
       {error}
       {phrase}
@@ -110,9 +114,17 @@
 </main>
 
 <style>
-  section {
+  main {
     max-width: 1600px;
     min-width: var(--keyboard-width);
+  }
+  #controls {
+    display: flex;
+    flex-direction: row;
+    gap: 0.3rem;
+  }
+
+  #test {
     display: flex;
     flex-direction: column;
     align-items: center;

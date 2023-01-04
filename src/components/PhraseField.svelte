@@ -115,13 +115,24 @@
   }
 
   article:not(:focus):before {
-    /* content: ''; */
+    content: '';
     position: absolute;
     left: 0;
     top: 0;
     right: 0;
     bottom: 0;
     backdrop-filter: blur(0.07em);
+    margin: -20px;
+  }
+
+  article:not(:focus) address:before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    backdrop-filter: blur(0.12em);
     margin: -20px;
   }
 

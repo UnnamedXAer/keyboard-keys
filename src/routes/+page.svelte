@@ -44,6 +44,7 @@
   let stats: Stats | null = null;
   let phraseTestsHistory: PhraseTestSummary[] = [];
   let currentMetadata: PhraseMetadata = getDefaultMetadata();
+  let hasFocus: boolean = false;
 
   $: error =
     futureContents.phrases.length == 0 && phrase === null ? 'I do not have more phrases' : null;
@@ -81,7 +82,7 @@
       return;
     }
 
-    if (position === null || position === -1) {
+    if (position === null || position === -1 || !hasFocus) {
       return;
     }
 
@@ -142,6 +143,7 @@
   }
 
   function focusHandler() {
+    hasFocus = true;
     if (isPhraseStarted) {
       currentMetadata.focusDurations.push({
         start: performance.now(),
@@ -151,6 +153,7 @@
   }
 
   function blurHandler() {
+    hasFocus = false;
     if (isPhraseStarted) {
       const currentDuration = currentMetadata.focusDurations.at(-1)!;
 
@@ -169,7 +172,9 @@
   };
 
   $: activeChars =
-    position !== -1 && phrase !== null ? [phrase[position!.wordIdx][position!.charIdx]] : [];
+    hasFocus && position !== -1 && phrase !== null
+      ? [phrase[position!.wordIdx][position!.charIdx]]
+      : [];
 </script>
 
 <h1>hi there</h1>
@@ -189,7 +194,7 @@
       {phrase}
       {isPhraseStarted}
       author={content?.author}
-      nextCharPosition={position}
+      nextCharPosition={hasFocus ? position : null}
       onFocusableKeyDown={keyDownHandler}
       onFocusableFocus={focusHandler}
       onFocusableBlur={blurHandler}

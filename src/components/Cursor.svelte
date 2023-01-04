@@ -1,15 +1,13 @@
 <script lang="ts">
   import type { CursorPosition } from '../routes/types';
 
-
   export let pos: CursorPosition | null;
   export let isPhraseStarted: boolean;
 </script>
 
 <div
-  style="opacity: {pos === null ? '0' : '1'}; translate: {pos?.x ??
-    0}px {(pos?.y ?? 0)}px;"
-  class:flashing={!isPhraseStarted}
+  style="opacity: {pos === null ? '0' : '1'}; translate: {pos?.x ?? 0}px {pos?.y ?? 0}px;"
+  class:flashing={!isPhraseStarted && pos !== null}
 />
 
 <style>

@@ -104,22 +104,33 @@
 
   function updatePhraseState(position: PhrasePosition, key: string, keyCode: number) {
     if (keyCode === VISIBLE_KEYS_TABLE.Backspace) {
+      // TODO: remove duplicated update logic, decide the indexes and then do the update once;
+
       if (position.charIdx > 0) {
-        phrase![position.wordIdx][position.charIdx - 1].state = CharState.untouched;
+        const oldState = phrase![position.wordIdx][position.charIdx - 1].state;
+        const wasWrong = oldState === CharState.wrong || oldState === CharState.corrected;
+        const updatedState = wasWrong ? CharState.backspacedWrong : CharState.untouched;
+        phrase![position.wordIdx][position.charIdx - 1].state = updatedState;
+
+        // TODO: did we miss `currentMetadata.totalCorrectEntriesCnt+/-; here?
         return;
       }
 
       if (position.wordIdx > 0) {
-        if (
-          phrase![position.wordIdx - 1][phrase![position.wordIdx - 1].length - 1].state ===
-            CharState.correct ||
-          phrase![position.wordIdx - 1][phrase![position.wordIdx - 1].length - 1].state ===
-            CharState.corrected
-        ) {
+        const oldState =
+          phrase![position.wordIdx - 1][phrase![position.wordIdx - 1].length - 1].state;
+
+        if (oldState === CharState.correct || oldState === CharState.corrected) {
+          // TODO: is this correct? shouldn't it be -1?
           currentMetadata.totalCorrectEntriesCnt++;
         }
+
+        const wasWrong = oldState === CharState.wrong || oldState === CharState.corrected;
+        const updatedState = wasWrong ? CharState.backspacedWrong : CharState.untouched;
+
         phrase![position.wordIdx - 1][phrase![position.wordIdx - 1].length - 1].state =
-          CharState.untouched;
+          updatedState;
+        return;
       }
 
       return;
@@ -132,8 +143,12 @@
       (phrase![position.wordIdx][position.charIdx].char === SPACE_SUBSTITUTE_CHAR &&
         key === SPACE_CHAR)
     ) {
+      const oldState = phrase![position.wordIdx][position.charIdx].state;
+      const updatedState =
+        oldState === CharState.backspacedWrong ? CharState.corrected : CharState.correct;
+
       currentMetadata.totalCorrectEntriesCnt++;
-      phrase![position.wordIdx][position.charIdx].state = CharState.correct;
+      phrase![position.wordIdx][position.charIdx].state = updatedState;
 
       return;
     }

@@ -154,12 +154,16 @@
     padding-inline-end: 0.2rem;
   }
 
-  .char.untouched {
+  .char.untouched, .char.backspacedWrong {
     color: var(--inactive-color);
   }
   .char.correct {
     color: #000000;
   }
+  .char.corrected {
+    color: #7d3433;
+  }
+
   .char.wrong {
     color: #f5261f;
   }

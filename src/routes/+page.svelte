@@ -13,6 +13,20 @@
   import type { PhrasePosition } from './types';
   import PhraseField from '../components/PhraseField.svelte';
   import type { PageData } from './$types';
+  import CurrentStats from '../components/CurrentStats.svelte';
+  import type { Stats } from '../components/statistics';
+  import {
+    calculatePhraseStatsAndSummary,
+    type PhraseMetadata,
+    type PhraseTestSummary,
+  } from '../helpers/stats';
+
+  const getDefaultMetadata: () => PhraseMetadata = () => ({
+    focusDurations: [],
+    totalCorrectEntriesCnt: 0,
+    totalEntriesCnt: 0,
+    totalWrongEntriesCnt: 0,
+  });
 
   export let data: PageData;
   const futureContents: {
@@ -25,22 +39,38 @@
   let content: Content | null = data.content;
   let phrase: Phrase | null = content?.phrase ?? null;
   let isPhraseStarted: boolean = false;
-  let position: PhrasePosition | null = findNextCharPosition(phrase);
+  let position: PhrasePosition | null | -1 = findNextCharPosition(phrase);
   let error: String | null = null;
+  let stats: Stats | null = null;
+  let phraseTestsHistory: PhraseTestSummary[] = [];
+  let currentMetadata: PhraseMetadata = getDefaultMetadata();
 
   $: error =
     futureContents.phrases.length == 0 && phrase === null ? 'I do not have more phrases' : null;
 
   async function updateContent() {
+    if (phrase !== null) {
+      if (currentMetadata.focusDurations.at(-1)!.stop === 0) {
+        currentMetadata.focusDurations.at(-1)!.stop = performance.now();
+      }
+      console.log(`meta: ${JSON.stringify(currentMetadata)}`);
+      [stats, phraseTestsHistory[phraseTestsHistory.length]] = calculatePhraseStatsAndSummary(
+        phrase,
+        currentMetadata,
+        phraseTestsHistory
+      );
+      currentMetadata = getDefaultMetadata();
+    }
+
     isPhraseStarted = false;
     content = await loadContent(fetch);
     phrase = content?.phrase ?? null;
-    updatePosition(phrase, position);
+    updatePosition(phrase);
   }
 
-  function updatePosition(phrase: Phrase | null, oldPosition: typeof position) {
+  function updatePosition(phrase: Phrase | null) {
     position = findNextCharPosition(phrase);
-    if (position === null && oldPosition !== null) {
+    if (position === -1) {
       updateContent();
     }
   }
@@ -51,33 +81,83 @@
       return;
     }
 
+    if (position === null || position === -1) {
+      return;
+    }
+
     if (!VISIBLE_KEYS.includes(ev.code as VisibleKeys[number])) {
       return;
     }
 
-    if (position === null) {
-      return;
+    updatePhraseState(position, ev.key, ev.keyCode);
+
+    if (!isPhraseStarted) {
+      isPhraseStarted = phrase![0][0].state !== CharState.untouched;
+      if (isPhraseStarted) {
+        currentMetadata.focusDurations.push({ start: performance.now(), stop: 0 });
+      }
     }
 
-    if (ev.keyCode === VISIBLE_KEYS_TABLE.Backspace) {
+    updatePosition(phrase);
+  }
+
+  function updatePhraseState(position: PhrasePosition, key: string, keyCode: number) {
+    if (keyCode === VISIBLE_KEYS_TABLE.Backspace) {
       if (position.charIdx > 0) {
         phrase![position.wordIdx][position.charIdx - 1].state = CharState.untouched;
-      } else if (position.wordIdx > 0) {
+        return;
+      }
+
+      if (position.wordIdx > 0) {
+        if (
+          phrase![position.wordIdx - 1][phrase![position.wordIdx - 1].length - 1].state ===
+            CharState.correct ||
+          phrase![position.wordIdx - 1][phrase![position.wordIdx - 1].length - 1].state ===
+            CharState.corrected
+        ) {
+          currentMetadata.totalCorrectEntriesCnt++;
+        }
         phrase![position.wordIdx - 1][phrase![position.wordIdx - 1].length - 1].state =
           CharState.untouched;
       }
-    } else if (
-      phrase![position.wordIdx][position.charIdx].char === ev.key ||
-      (phrase![position.wordIdx][position.charIdx].char === SPACE_SUBSTITUTE_CHAR &&
-        ev.key === SPACE_CHAR)
-    ) {
-      phrase![position.wordIdx][position.charIdx].state = CharState.correct;
-    } else {
-      phrase![position.wordIdx][position.charIdx].state = CharState.wrong;
+
+      return;
     }
 
-    isPhraseStarted ||= phrase![0][0].state !== CharState.untouched;
-    updatePosition(phrase, position);
+    currentMetadata.totalEntriesCnt++;
+
+    if (
+      phrase![position.wordIdx][position.charIdx].char === key ||
+      (phrase![position.wordIdx][position.charIdx].char === SPACE_SUBSTITUTE_CHAR &&
+        key === SPACE_CHAR)
+    ) {
+      currentMetadata.totalCorrectEntriesCnt++;
+      phrase![position.wordIdx][position.charIdx].state = CharState.correct;
+
+      return;
+    }
+
+    currentMetadata.totalWrongEntriesCnt++;
+    phrase![position.wordIdx][position.charIdx].state = CharState.wrong;
+  }
+
+  function focusHandler() {
+    if (isPhraseStarted) {
+      currentMetadata.focusDurations.push({
+        start: performance.now(),
+        stop: 0,
+      });
+    }
+  }
+
+  function blurHandler() {
+    if (isPhraseStarted) {
+      const currentDuration = currentMetadata.focusDurations.at(-1)!;
+
+      if (currentDuration.start !== 0 && currentDuration.stop === 0) {
+        currentDuration.stop = performance.now();
+      }
+    }
   }
 
   const buttonClickHandler = () => {
@@ -88,7 +168,8 @@
     });
   };
 
-  $: activeChars = position !== null && phrase ? [phrase[position.wordIdx][position.charIdx]] : [];
+  $: activeChars =
+    position !== -1 && phrase !== null ? [phrase[position!.wordIdx][position!.charIdx]] : [];
 </script>
 
 <h1>hi there</h1>
@@ -102,13 +183,16 @@
     <button on:click={buttonClickHandler}>reset</button>
   </section>
   <section id="test">
+    <CurrentStats stats={stats || {}} />
     <PhraseField
       {error}
       {phrase}
       {isPhraseStarted}
       author={content?.author}
       nextCharPosition={position}
-      onKeyDown={keyDownHandler}
+      onFocusableKeyDown={keyDownHandler}
+      onFocusableFocus={focusHandler}
+      onFocusableBlur={blurHandler}
     />
     <Keyboard {activeChars} />
   </section>

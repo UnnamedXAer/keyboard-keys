@@ -7,6 +7,15 @@
     %sveltekit.head%
 
     <style>
+      :root {
+        --background-color: #f4f4f4;
+        --color: #222222;
+        --label-color: #53606d;
+        --negative-color: #eb6d57;
+        --positive-color: #76cc20;
+        --neutral-color: #2b2b2b;
+      }
+
       * {
         box-sizing: border-box;
       }
@@ -18,12 +27,18 @@
       body {
         margin: 0;
         padding: 0;
-        background-color: #f4f4f4;
+        background-color: var(--background-color);
+        color: var(--color);
+      }
+
+      label,
+      .label {
+        color: var(--label-color);
       }
 
       #no-js {
-		padding: 1rem;
-        background-color: rgb(255, 131, 109);
+        padding: 1rem;
+        background-color: #ff836d;
       }
     </style>
   </head>

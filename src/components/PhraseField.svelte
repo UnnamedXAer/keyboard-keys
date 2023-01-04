@@ -8,8 +8,10 @@
   export let phrase: Phrase | null;
   export let isPhraseStarted: boolean;
   export let author: string | undefined;
-  export let nextCharPosition: PhrasePosition | null;
-  export let onKeyDown: (event: KeyboardEvent) => void;
+  export let nextCharPosition: PhrasePosition | null | -1;
+  export let onFocusableKeyDown: (event: KeyboardEvent) => void;
+  export let onFocusableFocus: (event: FocusEvent) => void;
+  export let onFocusableBlur: (event: FocusEvent) => void;
   let focusableElement: HTMLElement | undefined;
   let cursorPos: CursorPosition | null = null;
 
@@ -19,10 +21,15 @@
 
   function getCursorPos(
     phrase: Phrase | null,
-    nextCharPosition: PhrasePosition | null,
+    nextCharPosition: PhrasePosition | null | -1,
     focusableElement?: HTMLElement
   ): CursorPosition | null {
-    if (phrase === null || nextCharPosition === null || !focusableElement) {
+    if (
+      phrase === null ||
+      nextCharPosition === null ||
+      nextCharPosition === -1 ||
+      !focusableElement
+    ) {
       return null;
     }
 
@@ -65,7 +72,9 @@
     bind:this={focusableElement}
     tabindex="0"
     aria-roledescription="contains text for the user to be typed on the keyboard, also visually indicates current position and correctness of users input"
-    on:keydown={onKeyDown}
+    on:keydown={onFocusableKeyDown}
+    on:focus={onFocusableFocus}
+    on:blur={onFocusableBlur}
   >
     {#if error !== null}
       <p>Error: {error}</p>

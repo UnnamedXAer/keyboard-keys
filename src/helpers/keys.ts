@@ -33,10 +33,13 @@ export const KEYBOARD_KEYS = {
 export function stringToAppKeys(txt: string): AppKey[] {
   return txt.split('').map((x) => new AppKey(x.charCodeAt(0)));
 }
-
+/**
+ * @param phrase
+ * @returns -1 means user reach the end of a phrase
+ */
 export function findNextCharPosition(
   phrase: Phrase | null
-): { wordIdx: number; charIdx: number } | null {
+): { wordIdx: number; charIdx: number } | null | -1 {
   if (phrase === null) {
     return null;
   }
@@ -53,5 +56,5 @@ export function findNextCharPosition(
     }
   }
 
-  return null;
+  return -1;
 }

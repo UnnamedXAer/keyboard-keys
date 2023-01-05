@@ -154,7 +154,8 @@
     padding-inline-end: 0.2rem;
   }
 
-  .char.untouched, .char.backspacedWrong {
+  .char.untouched,
+  .char.backspacedWrong {
     color: var(--inactive-color);
   }
   .char.correct {

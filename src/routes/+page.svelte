@@ -20,6 +20,8 @@
     type PhraseMetadata,
     type PhraseTestSummary,
   } from '../helpers/stats';
+  import { onDestroy, onMount } from 'svelte';
+  import { LocalDb } from '../indexedDb/indexedDb';
 
   const getDefaultMetadata: () => PhraseMetadata = () => ({
     focusDurations: [],
@@ -45,9 +47,34 @@
   let phraseTestsHistory: PhraseTestSummary[] = [];
   let currentMetadata: PhraseMetadata = getDefaultMetadata();
   let hasFocus: boolean = false;
-
   $: error =
     futureContents.phrases.length == 0 && phrase === null ? 'I do not have more phrases' : null;
+
+  let idleCallback: number | null = null;
+  onMount(() => {
+    idleCallback = requestIdleCallback(async () => {
+      if (stats === null) {
+        return;
+      }
+      const db = new LocalDb();
+      await db.open();
+      const results = await db.getPhraseSummaries(3);
+      console.log(results);
+      if (results.length) {
+        phraseTestsHistory = results;
+        results.at(1)!; // convert into stats
+      }
+    });
+  });
+
+  onDestroy(() => {
+    if (idleCallback !== null) {
+      cancelIdleCallback(idleCallback);
+    } else {
+      const db = new LocalDb();
+      db.close();
+    }
+  });
 
   async function updateContent() {
     if (phrase !== null) {

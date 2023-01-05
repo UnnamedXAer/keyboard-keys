@@ -25,6 +25,7 @@ export class PhraseTestSummary {
   wpmGross = 0;
   wpmNet = 0;
   accuracyValue = 0;
+  createdAt = new Date();
 }
 
 export function calculatePhraseStatsAndSummary(
@@ -136,6 +137,7 @@ export function calculatePhraseStatsAndSummary(
     uncorrectedEntriesCnt,
     wpmGross,
     wpmNet,
+    createdAt: new Date(),
   } satisfies PhraseTestSummary;
 
   return [stats, testSummary];

@@ -1,16 +1,21 @@
-import type { PhraseTestSummary } from '../helpers/stats';
+import { PhraseTestSummary } from '../helpers/stats';
 
 export class LocalDb {
   private static _instance: LocalDb;
   private readonly phraseSummaryStoreName = 'phrase-summary' as const;
   private readonly version = 1 as const;
   private readonly dbName = 'keyboarding-db' as const;
-  private _db?: IDBDatabase;
-  //   _this = this;
+  private _db: IDBDatabase | null = null;
 
   private get db() {
-    if (!this._db) throw Error('database must be opened first to use it, see `openDb`');
+    if (this._db === null) {
+      throw Error('database must be opened first to use it, see `open`');
+    }
     return this._db;
+  }
+
+  public get isOpened() {
+    return this._db != null;
   }
 
   constructor() {
@@ -30,12 +35,8 @@ export class LocalDb {
 
       requestOpenDb.onupgradeneeded = (ev) => {
         const db = requestOpenDb.result;
-        // triggered when user had no database
-        // .. perform initialization
-
-        // requestOpenDb.result
+        // db.version = 0 -> triggered when user had no database
         db.createObjectStore('phrase-summary', {
-          // autoIncrement: true,
           keyPath: 'createdAt' satisfies keyof PhraseTestSummary,
         });
       };
@@ -53,7 +54,6 @@ export class LocalDb {
       };
 
       requestOpenDb.onsuccess = (ev) => {
-        console.log('IDBOpenDBRequest: result: ', requestOpenDb.result);
         this._db = requestOpenDb.result;
 
         this.db.onversionchange = (ev) => {
@@ -75,22 +75,23 @@ export class LocalDb {
   }
 
   close() {
-    this.db.close();
+    this._db?.close();
+    this._db = null;
   }
 
   writePhraseSummary(data: PhraseTestSummary) {
-    return new Promise<string>((resolve, reject) => {
-      const transation = this.db.transaction(this.phraseSummaryStoreName, 'readwrite');
-      transation.onerror = (ev) => {
+    return new Promise<Date>((resolve, reject) => {
+      const transaction = this.db.transaction(this.phraseSummaryStoreName, 'readwrite');
+      transaction.onerror = (ev) => {
         ev.stopPropagation();
         reject(request.error);
       };
 
-      transation.onabort = (ev) => {
+      transaction.onabort = (ev) => {
         console.log('transaction abort', data, ev);
       };
 
-      const store = transation.objectStore(this.phraseSummaryStoreName);
+      const store = transaction.objectStore(this.phraseSummaryStoreName);
 
       const request = store.add(data);
 
@@ -98,7 +99,7 @@ export class LocalDb {
         if (request.error?.name == 'ConstraintError') {
           ev.stopPropagation();
           ev.preventDefault();
-          transation.abort();
+          transaction.abort();
           data.createdAt.setTime(data.createdAt.getTime() + 1);
           resolve(this.writePhraseSummary(data));
           return;
@@ -106,38 +107,38 @@ export class LocalDb {
       };
 
       request.onsuccess = (ev) => {
-        resolve(request.result.toString());
+        resolve(request.result as Date);
       };
     });
   }
 
   getPhraseSummaries(limit = 10) {
     return new Promise<PhraseTestSummary[]>((resolve, reject) => {
-      const transation = this.db.transaction(this.phraseSummaryStoreName, 'readonly');
-      transation.onerror = (ev) => {
+      const transaction = this.db.transaction(this.phraseSummaryStoreName, 'readonly');
+      transaction.onerror = (ev) => {
         ev.stopPropagation;
         reject(request.error);
       };
 
-      const store = transation.objectStore(this.phraseSummaryStoreName);
+      const store = transaction.objectStore(this.phraseSummaryStoreName);
 
       const request = store.getAll(void 0, limit);
 
       request.onsuccess = (ev) => {
-        resolve(request.result);
+        resolve(request.result.map((x) => new PhraseTestSummary(x)));
       };
     });
   }
 
   deletePhraseSummary(createdAt: PhraseTestSummary['createdAt']): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      const transation = this.db.transaction(this.phraseSummaryStoreName, 'readonly');
-      transation.onerror = (ev) => {
+      const transaction = this.db.transaction(this.phraseSummaryStoreName, 'readonly');
+      transaction.onerror = (ev) => {
         ev.stopPropagation;
         reject(request.error);
       };
 
-      const store = transation.objectStore(this.phraseSummaryStoreName);
+      const store = transaction.objectStore(this.phraseSummaryStoreName);
 
       const request = store.delete(IDBKeyRange.only(createdAt));
 

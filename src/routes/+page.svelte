@@ -17,6 +17,7 @@
   import type { Stats } from '../components/statistics';
   import {
     calculatePhraseStatsAndSummary,
+    getPhraseStatsFromSummary,
     type PhraseMetadata,
     type PhraseTestSummary,
   } from '../helpers/stats';
@@ -52,19 +53,15 @@
 
   let idleCallback: number | null = null;
   onMount(() => {
-    idleCallback = requestIdleCallback(async () => {
-      if (stats === null) {
-        return;
-      }
-      const db = new LocalDb();
-      await db.open();
-      const results = await db.getPhraseSummaries(3);
-      console.log(results);
-      if (results.length) {
-        phraseTestsHistory = results;
-        results.at(1)!; // convert into stats
-      }
-    });
+    idleCallback = requestIdleCallback(
+      async () => {
+        const db = new LocalDb();
+        await db.open();
+        phraseTestsHistory = await db.getPhraseSummaries(2);
+        stats = getPhraseStatsFromSummary(phraseTestsHistory);
+      },
+      { timeout: 5000 }
+    );
   });
 
   onDestroy(() => {
@@ -77,23 +74,37 @@
   });
 
   async function updateContent() {
-    if (phrase !== null) {
-      if (currentMetadata.focusDurations.at(-1)!.stop === 0) {
-        currentMetadata.focusDurations.at(-1)!.stop = performance.now();
-      }
-      console.log(`meta: ${JSON.stringify(currentMetadata)}`);
-      [stats, phraseTestsHistory[phraseTestsHistory.length]] = calculatePhraseStatsAndSummary(
-        phrase,
-        currentMetadata,
-        phraseTestsHistory
-      );
-      currentMetadata = getDefaultMetadata();
-    }
+    gatherStatsAndGetSummary();
 
     isPhraseStarted = false;
     content = await loadContent(fetch);
     phrase = content?.phrase ?? null;
     updatePosition(phrase);
+  }
+
+  function gatherStatsAndGetSummary() {
+    if (phrase !== null && position === -1) {
+      if (currentMetadata.focusDurations.at(-1)!.stop === 0) {
+        currentMetadata.focusDurations.at(-1)!.stop = performance.now();
+      }
+      phraseTestsHistory[phraseTestsHistory.length] = calculatePhraseStatsAndSummary(
+        phrase,
+        currentMetadata
+      );
+      stats = getPhraseStatsFromSummary(phraseTestsHistory);
+      currentMetadata = getDefaultMetadata();
+
+      requestIdleCallback(
+        async () => {
+          const db = new LocalDb();
+          if (!db.isOpened) {
+            return;
+          }
+          await db.writePhraseSummary(phraseTestsHistory[phraseTestsHistory.length - 1]);
+        },
+        { timeout: 5000 }
+      );
+    }
   }
 
   function updatePosition(phrase: Phrase | null) {

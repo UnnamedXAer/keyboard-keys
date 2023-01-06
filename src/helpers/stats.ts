@@ -15,26 +15,37 @@ export type PhraseMetadata = {
 };
 
 export class PhraseTestSummary {
-  phraseCharsCnt = 0;
-  totalEntriesCnt = 0;
-  entriesCnt = 0;
-  totalCorrectEntriesCnt = 0;
-  totalWrongEntriesCnt = 0;
-  uncorrectedEntriesCnt = 0;
-  totalTime = 0;
-  wpmGross = 0;
-  wpmNet = 0;
-  accuracyValue = 0;
-  createdAt = new Date();
+  phraseCharsCnt: number;
+  totalEntriesCnt: number;
+  entriesCnt: number;
+  totalCorrectEntriesCnt: number;
+  totalWrongEntriesCnt: number;
+  uncorrectedEntriesCnt: number;
+  totalTime: number;
+  wpmGross: number;
+  wpmNet: number;
+  accuracyValue: number;
+  createdAt: Date;
+
+  constructor(args: Partial<PhraseTestSummary>) {
+    this.phraseCharsCnt = args.phraseCharsCnt ?? 0;
+    this.totalEntriesCnt = args.totalEntriesCnt ?? 0;
+    this.entriesCnt = args.entriesCnt ?? 0;
+    this.totalCorrectEntriesCnt = args.totalCorrectEntriesCnt ?? 0;
+    this.totalWrongEntriesCnt = args.totalWrongEntriesCnt ?? 0;
+    this.uncorrectedEntriesCnt = args.uncorrectedEntriesCnt ?? 0;
+    this.totalTime = args.totalTime ?? 0;
+    this.wpmGross = args.wpmGross ?? 0;
+    this.wpmNet = args.wpmNet ?? 0;
+    this.accuracyValue = args.accuracyValue ?? 0;
+    this.createdAt = args.createdAt ?? new Date();
+  }
 }
 
 export function calculatePhraseStatsAndSummary(
   phrase: Phrase,
-  metadata: PhraseMetadata,
-  summaryHistory: PhraseTestSummary[]
-): [Stats, PhraseTestSummary] {
-  const lastSummary = summaryHistory.at(-1) || new PhraseTestSummary();
-
+  metadata: PhraseMetadata
+): PhraseTestSummary {
   let entriesCnt = 0;
   let uncorrectedEntriesCnt = 0;
   let phraseCharsCnt = 0;
@@ -55,48 +66,70 @@ export function calculatePhraseStatsAndSummary(
   metadata.focusDurations.forEach((x) => {
     totalTime = x.stop - x.start;
   });
-  const timeMin = totalTime / 1000 / 60; // mb divide once more ...
-
-  console.log(`Metadata: totalTime: ${totalTime} => ${timeMin}min`);
+  const timeMin = totalTime / 1000 / 60;
 
   const wpmGross = entriesCnt / 5 / timeMin;
   const wpmNet = wpmGross - uncorrectedEntriesCnt / timeMin;
 
-  const speed = {
-    label: 'Speed',
-    value: `${Math.max(wpmNet, 0.0).toFixed(2)} wpm`,
-    state: getStatPropState(wpmNet, lastSummary.wpmNet),
-    info: 'Words per Minute',
-  } satisfies Stats[string];
-
   const accuracyValue = (metadata.totalCorrectEntriesCnt / metadata.totalEntriesCnt) * 100;
 
-  console.log(accuracyValue);
+  const testSummary = new PhraseTestSummary({
+    entriesCnt,
+    accuracyValue,
+    phraseCharsCnt,
+    totalCorrectEntriesCnt: metadata.totalCorrectEntriesCnt,
+    totalEntriesCnt: metadata.totalEntriesCnt,
+    totalWrongEntriesCnt: metadata.totalWrongEntriesCnt,
+    totalTime,
+    uncorrectedEntriesCnt,
+    wpmGross,
+    wpmNet,
+    createdAt: new Date(),
+  });
+
+  return testSummary;
+}
+
+export function getPhraseStatsFromSummary(summaryHistory: PhraseTestSummary[]): Stats | null {
+  const lastSummary = summaryHistory.at(-1);
+
+  if (!lastSummary) {
+    return null;
+  }
+
+  const prevSummary = summaryHistory.at(-2) ?? lastSummary;
+
+  const speed = {
+    label: 'Speed',
+    value: `${Math.max(lastSummary.wpmNet, 0.0).toFixed(2)} wpm`,
+    state: getStatPropState(lastSummary.wpmNet, prevSummary.wpmNet),
+    info: 'Words per Minute',
+  } satisfies Stats[string];
 
   const accuracy = {
     label: 'Accuracy',
     value: `${
-      Number.isNaN(accuracyValue)
+      Number.isNaN(lastSummary.accuracyValue)
         ? '-'
-        : accuracyValue >= 100
+        : lastSummary.accuracyValue >= 100
         ? 100
-        : Math.max(accuracyValue, 0).toFixed(2)
+        : Math.max(lastSummary.accuracyValue, 0).toFixed(2)
     } %`,
-    state: getStatPropState(accuracyValue, lastSummary.accuracyValue),
+    state: getStatPropState(lastSummary.accuracyValue, prevSummary.accuracyValue),
     info: 'The ratio of all correct entries to all entries',
   } satisfies Stats[string];
 
   const errors = {
     label: 'Errors',
-    value: `${uncorrectedEntriesCnt}/${metadata.totalWrongEntriesCnt}`,
+    value: `${lastSummary.uncorrectedEntriesCnt}/${lastSummary.totalWrongEntriesCnt}`,
     state: getStatPropState(
-      uncorrectedEntriesCnt / metadata.totalWrongEntriesCnt,
-      lastSummary.uncorrectedEntriesCnt / lastSummary.totalWrongEntriesCnt
+      lastSummary.uncorrectedEntriesCnt / lastSummary.totalWrongEntriesCnt,
+      prevSummary.uncorrectedEntriesCnt / prevSummary.totalWrongEntriesCnt
     ),
     info: 'Uncorrected / Total errors',
   } satisfies Stats[string];
 
-  const duration = new Date(1970, 0, 0, 0, 0, 0, totalTime);
+  const duration = new Date(1970, 0, 0, 0, 0, 0, lastSummary.totalTime);
   let seconds = duration.getSeconds();
   const minutes = duration.getMinutes();
   if (minutes > 0) {
@@ -113,7 +146,7 @@ export function calculatePhraseStatsAndSummary(
 
   const phraseLength = {
     label: 'Text Len.',
-    value: `${phraseCharsCnt}`,
+    value: `${lastSummary.phraseCharsCnt}`,
     state: StatState.neutral,
     info: 'Characters is the phrase',
   } satisfies Stats[string];
@@ -126,21 +159,7 @@ export function calculatePhraseStatsAndSummary(
     phraseLength,
   } satisfies Stats;
 
-  const testSummary = {
-    entriesCnt,
-    accuracyValue,
-    phraseCharsCnt,
-    totalCorrectEntriesCnt: metadata.totalCorrectEntriesCnt,
-    totalEntriesCnt: metadata.totalEntriesCnt,
-    totalWrongEntriesCnt: metadata.totalWrongEntriesCnt,
-    totalTime,
-    uncorrectedEntriesCnt,
-    wpmGross,
-    wpmNet,
-    createdAt: new Date(),
-  } satisfies PhraseTestSummary;
-
-  return [stats, testSummary];
+  return stats;
 }
 
 const getStatPropState = (val: number, oldVal: number): StatState =>

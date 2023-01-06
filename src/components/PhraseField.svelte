@@ -119,7 +119,7 @@
     outline: none;
   }
 
-  article:not(:focus):after {
+  article:not(:focus)::before {
     content: '';
     position: absolute;
     left: 0;
@@ -130,7 +130,7 @@
     margin: -20px;
   }
 
-  article:not(:focus) address:after {
+  article:not(:focus) address:before {
     content: '';
     position: absolute;
     left: 0;
@@ -140,7 +140,7 @@
     backdrop-filter: blur(0.12em);
     margin: -20px;
   }
-
+  
   address {
     position: absolute;
     right: 1.5rem;
@@ -149,6 +149,7 @@
     font-style: italic;
     letter-spacing: normal;
     color: var(--inactive-color);
+    z-index: 1;
   }
 
   .word {

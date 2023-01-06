@@ -7,7 +7,7 @@
     %sveltekit.head%
 
     <style>
-/* dark theme 
+      /* dark theme 
 * gb: 232323;
 	negaative: c24938
 	positive: 76cc20
@@ -21,7 +21,6 @@
 	corrected: ffa8a2
 */
 
-
       :root {
         --background-color: #f4f4f4;
         --color: #222222;
@@ -29,6 +28,15 @@
         --negative-color: #eb6d57;
         --positive-color: #76cc20;
         --neutral-color: #2b2b2b;
+
+        /** Keyboard */
+        --border-width: 1px;
+        --key-base-size: calc(55px + (var(--border-width) * 2));
+        --key-gap: calc(var(--key-base-size) * 1 / 5);
+        --keyboard-width: calc(
+          (var(--key-base-size) * 15) + (var(--key-gap) * 14) + (var(--key-gap) * 2) +
+            (var(--border-width) * 2)
+        );
       }
 
       * {

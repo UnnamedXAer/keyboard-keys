@@ -11,7 +11,7 @@
     type VisibleKeys,
   } from '../constants/constants';
   import type { PhrasePosition } from './types';
-  import PhraseField from '../components/PhraseField.svelte';
+  import PhraseField from '../components/phrase/PhraseField.svelte';
   import type { PageData } from './$types';
   import CurrentStats from '../components/CurrentStats.svelte';
   import type { Stats } from '../components/statistics';
@@ -220,7 +220,7 @@
   const buttonClickHandler = () => {
     updateContent();
     requestAnimationFrame(() => {
-      document.querySelector<HTMLElement>('#phrase_focusable')?.focus();
+      document.querySelector<HTMLElement>('#focusable-area')?.focus();
       requestAnimationFrame(() => console.log(document.activeElement));
     });
   };

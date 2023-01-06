@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { CursorPosition } from '../routes/types';
+  import type { CursorPosition } from '../../routes/types';
 
   export let pos: CursorPosition | null;
   export let isPhraseStarted: boolean;

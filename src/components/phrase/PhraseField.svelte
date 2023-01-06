@@ -2,7 +2,7 @@
   import type { Phrase } from 'src/helpers/text';
   import { onMount } from 'svelte';
   import Cursor from './Cursor.svelte';
-  import type { PhrasePosition, CursorPosition } from '../routes/types';
+  import type { PhrasePosition, CursorPosition } from '../../routes/types';
 
   export let error: String | null;
   export let phrase: Phrase | null;
@@ -68,7 +68,7 @@
 <section>
   <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
   <article
-    id="phrase_focusable"
+    id="focusable-area"
     bind:this={focusableElement}
     tabindex="0"
     aria-roledescription="contains text for the user to be typed on the keyboard, also visually indicates current position and correctness of users input"

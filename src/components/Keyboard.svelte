@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { AppKey, TextChar } from '../models/key';
   import { KEYBOARD_KEYS } from '../helpers/keys';
-  import KeyBtn from './Key.svelte';
+  import KeyBtn from './KeyBtn.svelte';
   import { SPACE_SUBSTITUTE_CHAR, VISIBLE_KEYS_TABLE } from '../constants/constants';
 
   export let activeChars: TextChar[];
@@ -38,14 +38,6 @@
   }
 
   #keyboard {
-    --border-width: 1px;
-    --key-base-size: calc(55px + (var(--border-width) * 2));
-    --key-gap: calc(var(--key-base-size) * 1 / 5);
-    --keyboard-width: calc(
-      (var(--key-base-size) * 15) + (var(--key-gap) * 14) + (var(--key-gap) * 2) +
-        (var(--border-width) * 2)
-    );
-
     user-select: none;
 
     font-family: 'Source Sans Pro';

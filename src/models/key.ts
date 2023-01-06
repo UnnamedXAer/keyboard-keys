@@ -15,4 +15,5 @@ export class AppKey {
 export type TextChar = {
   char: string;
   state: CharState;
+  wrongEntries: string[];
 };

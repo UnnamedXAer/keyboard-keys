@@ -192,6 +192,7 @@
     }
 
     currentMetadata.totalWrongEntriesCnt++;
+    phrase![position.wordIdx][position.charIdx].wrongEntries.push(key);
     phrase![position.wordIdx][position.charIdx].state = CharState.wrong;
   }
 

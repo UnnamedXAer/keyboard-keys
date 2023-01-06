@@ -80,10 +80,15 @@
       <p>Error: {error}</p>
     {:else if phrase !== null}
       <Cursor pos={cursorPos} {isPhraseStarted} />
-      {#each phrase as word, x}
+      {#each phrase as word}
         <span class="word">
-          {#each word as char, y}
-            <span class="char {char.state}">{char.char}</span>
+          {#each word as char}
+            <span class="char {char.state}"
+              >{char.char}
+              <div class="entries" title="{char.char}:&#013;{char.wrongEntries.join(', ')}">
+                {char.wrongEntries.join(',')}
+              </div>
+            </span>
           {/each}
         </span>
       {/each}
@@ -114,7 +119,7 @@
     outline: none;
   }
 
-  article:not(:focus):before {
+  article:not(:focus):after {
     content: '';
     position: absolute;
     left: 0;
@@ -125,7 +130,7 @@
     margin: -20px;
   }
 
-  article:not(:focus) address:before {
+  article:not(:focus) address:after {
     content: '';
     position: absolute;
     left: 0;
@@ -148,10 +153,27 @@
 
   .word {
     display: inline-block;
+    border-bottom: 2px solid #bdb76b;
   }
 
   .char {
     padding-inline-end: 0.2rem;
+    position: relative;
+    display: inline-block;
+  }
+
+  .char > .entries {
+    position: absolute;
+    font-size: 10px;
+    letter-spacing: normal;
+    text-align: left;
+    color: #303030;
+    padding-left: 0.1rem;
+    left: -0.2rem;
+    width: 100%;
+    bottom: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .char.untouched,

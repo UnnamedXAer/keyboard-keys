@@ -17,3 +17,7 @@ export type TextChar = {
   state: CharState;
   wrongEntries: string[];
 };
+
+export type SingleKey = TextChar & {
+  appKey: AppKey;
+};

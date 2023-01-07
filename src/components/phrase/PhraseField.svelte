@@ -102,10 +102,12 @@
 <style>
   :root {
     --phrase-font-size: 4rem;
-    --inactive-color: #888888;
   }
   section {
     min-height: calc(4 * var(--phrase-font-size) + 2 * 2rem);
+
+    --corrected-color: #7d3433;
+    --wrong-color: #f5261f;
   }
 
   article {
@@ -140,7 +142,7 @@
     backdrop-filter: blur(0.12em);
     margin: -20px;
   }
-  
+
   address {
     position: absolute;
     right: 1.5rem;
@@ -154,7 +156,7 @@
 
   .word {
     display: inline-block;
-    border-bottom: 2px solid #bdb76b;
+    border-bottom: 2px solid var(--test-accent-color);
   }
 
   .char {
@@ -177,18 +179,17 @@
     text-overflow: ellipsis;
   }
 
-  .char.untouched,
-  .char.backspacedWrong {
+  .untouched,
+  .backspacedWrong {
     color: var(--inactive-color);
   }
-  .char.correct {
+  .correct {
     color: #000000;
   }
-  .char.corrected {
-    color: #7d3433;
+  .corrected {
+    color: var(--corrected-color);
   }
-
-  .char.wrong {
-    color: #f5261f;
+  .wrong {
+    color: var(--wrong-color);
   }
 </style>

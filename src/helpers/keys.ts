@@ -1,5 +1,5 @@
-import { untypedStatuses } from '../constants/constants';
-import { AppKey } from '../models/key';
+import { notACorrectStatuses, untypedStatuses } from '../constants/constants';
+import { AppKey, type SingleKey } from '../models/key';
 import type { Phrase } from './text';
 
 export const KEYBOARD_KEYS = {
@@ -53,6 +53,20 @@ export function findNextCharPosition(
           charIdx,
         };
       }
+    }
+  }
+
+  return -1;
+}
+
+/**
+ * @param keys
+ * @returns -1 means user reach the end of a keys
+ */
+export function findNextKeyPosition(keys: SingleKey[]): number | -1 {
+  for (let idx = 0; idx < keys.length; idx++) {
+    if (notACorrectStatuses.includes(keys[idx].state)) {
+      return idx;
     }
   }
 

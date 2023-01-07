@@ -28,15 +28,6 @@
 </div>
 
 <style>
-  @font-face {
-    font-family: 'Source Sans Pro';
-    font-style: normal;
-    font-weight: 400;
-    src: local('Source Sans Pro'),
-      url('./fonts/source-sans-pro-v21-latin-ext_latin-regular.woff2') format('woff2'),
-      url('./fonts/source-sans-pro-v21-latin-ext_latin-regular.woff') format('woff');
-  }
-
   #keyboard {
     user-select: none;
 

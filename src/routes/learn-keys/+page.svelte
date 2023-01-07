@@ -1,21 +1,58 @@
 <script lang="ts">
-  import { stringToAppKeys } from '../../helpers/keys';
-  import type { AppKey } from '../../models/key';
+  import { findNextKeyPosition, stringToAppKeys } from '../../helpers/keys';
+  import type { AppKey, SingleKey } from '../../models/key';
   import CurrentStats from '../../components/CurrentStats.svelte';
   import Keyboard from '../../components/Keyboard.svelte';
-  import KeyBtn from '../../components/KeyBtn.svelte';
   import KeysFields from '../../components/singleKeys/KeysFields.svelte';
+  import {
+    BACKSPACE_KEY_CODE,
+    CharState,
+    SPACE_CHAR,
+    SPACE_SUBSTITUTE_CHAR,
+    VISIBLE_KEYS,
+    type VisibleKeys,
+  } from '../../constants/constants';
 
+  const availableKeys = stringToAppKeys('qwertyuiopasdfghjklzxcvbnm');
+
+  function mapAppKeysToSingleKeys(appKeys: AppKey[]): SingleKey[] {
+    return appKeys.map<SingleKey>((appKey) => {
+      return {
+        appKey,
+        char: String.fromCharCode(appKey.keyCode),
+        state: CharState.untouched,
+        wrongEntries: [],
+      };
+    });
+  }
+
+  type Position = number | -1;
   let isStarted: boolean = false;
 
   let error: String | null = null;
-  let keys: AppKey[] = [...stringToAppKeys("asdfghjkl;'")];
-  let position: number = 0;
+  let keys: SingleKey[] = [];
+  let position: Position = 0;
   let hasFocus: boolean = false;
+
+  function updateKeys() {
+    const randomKeys: AppKey[] = [...Array(3)].map(
+      () => availableKeys[~~(availableKeys.length * Math.random())]
+    );
+    keys = mapAppKeysToSingleKeys(randomKeys);
+    position = 0;
+  }
+  updateKeys();
+
+  function updatePosition() {
+    position = findNextKeyPosition(keys);
+    if (position === -1) {
+      updateKeys();
+    }
+  }
 
   function keyDownHandler(ev: KeyboardEvent) {
     if (ev.ctrlKey && ev.keyCode === 13) {
-      //   updateContent();
+      updateKeys();
       return;
     }
 
@@ -23,62 +60,68 @@
       return;
     }
 
-    // if (!VISIBLE_KEYS.includes(ev.code as VisibleKeys[number])) {
-    //   return;
-    // }
+    if (!VISIBLE_KEYS.includes(ev.code as VisibleKeys[number])) {
+      return;
+    }
 
-    // updatePhraseState(position, ev.key, ev.keyCode);
+    updateKeysState(position, ev.key, ev.keyCode);
 
-    // if (!isPhraseStarted) {
-    //   isPhraseStarted = phrase![0][0].state !== CharState.untouched;
-    //   if (isPhraseStarted) {
-    //     currentMetadata.focusDurations.push({ start: performance.now(), stop: 0 });
-    //   }
-    // }
+    if (!isStarted) {
+      isStarted = keys[0].state !== CharState.untouched;
+    }
 
-    // updatePosition(phrase);
+    updatePosition();
+  }
+
+  function updateKeysState(position: number, key: string, keyCode: number) {
+    if (keyCode === BACKSPACE_KEY_CODE) {
+      if (position > 0) {
+        const oldState = keys[position - 1].state;
+        const wasWrong = oldState === CharState.wrong || oldState === CharState.corrected;
+        const updatedState = wasWrong ? CharState.backspacedWrong : CharState.untouched;
+        keys[position].state = updatedState;
+
+        return;
+      }
+      return;
+    }
+
+    if (
+      keys[position].char === key ||
+      (keys[position].char === SPACE_SUBSTITUTE_CHAR && key === SPACE_CHAR)
+    ) {
+      const oldState = keys[position].state;
+      const updatedState =
+        oldState === CharState.backspacedWrong ? CharState.corrected : CharState.correct;
+
+      keys[position].state = updatedState;
+
+      return;
+    }
+
+    keys[position].wrongEntries.push(key);
+    keys[position].state = CharState.wrong;
   }
 
   function focusHandler() {
     hasFocus = true;
-    if (isStarted) {
-      //   currentMetadata.focusDurations.push({
-      //     start: performance.now(),
-      //     stop: 0,
-      //   });
-    }
   }
 
   function blurHandler() {
     hasFocus = false;
-    // if (isStarted) {
-    //   const currentDuration = currentMetadata.focusDurations.at(-1)!;
-
-    //   if (currentDuration.start !== 0 && currentDuration.stop === 0) {
-    //     currentDuration.stop = performance.now();
-    //   }
-    // }
   }
-
-  const buttonClickHandler = () => {
-    requestAnimationFrame(() => {
-      document.querySelector<HTMLElement>('#focusable_area')?.focus();
-      requestAnimationFrame(() => console.log(document.activeElement));
-    });
-  };
-  $: activeChars = [];
+  $: activeChars = keys.length ? [keys[position]] : [];
 </script>
 
-<h1>hi there</h1>
+<nav>
+  <menu>
+    <li><a href="/">Learn Typing</a></li>
+  </menu>
+  <hr />
+</nav>
 
 <main>
-  <section id="controls">
-    <label for="isStarted">
-      is Phrase Started:
-      <input type="checkbox" name="yes" id="isStarted" bind:checked={isStarted} />
-    </label>
-    <button on:click={buttonClickHandler}>reset</button>
-  </section>
+  <section id="controls" />
   <section id="test">
     <CurrentStats stats={{}} />
     <KeysFields

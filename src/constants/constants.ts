@@ -9,6 +9,9 @@ export enum CharState {
 export const SPACE_SUBSTITUTE_CHAR = '␣';
 export const SPACE_CHAR = ' ';
 export const untypedStatuses = [CharState.untouched, CharState.backspacedWrong];
+export const notACorrectStatuses = [...untypedStatuses, CharState.wrong];
+
+export const BACKSPACE_KEY_CODE = 8;
 
 export const VISIBLE_KEYS_TABLE = {
   Backquote: 192,
@@ -73,7 +76,7 @@ export const VISIBLE_KEYS_TABLE = {
   Numpad3: 34,
   Numpad0: 45,
   Space: 32,
-  Backspace: 8,
+  //   Backspace: 8,
 } as const;
 
 export type VisibleKeys = [keyof typeof VISIBLE_KEYS_TABLE];

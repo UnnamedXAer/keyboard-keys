@@ -7,27 +7,42 @@
     %sveltekit.head%
 
     <style>
-      /* dark theme 
-* gb: 232323;
-	negaative: c24938
-	positive: 76cc20
-	neutral: e9e9e9
-	label: 9fadbc
-	btn bg/fg : 7b7b7b / ~ffffff
-	keyboard text color: f1f1f1 or f6f6f6
-	text-color: f6f6f6
-	untouched: 7f7f7f
-	correct : ~ffffff
-	corrected: ffa8a2
-*/
+      @font-face {
+        font-family: 'Source Sans Pro';
+        font-style: normal;
+        font-weight: 400;
+        src: local('Source Sans Pro'),
+          url('./fonts/source-sans-pro-v21-latin-ext_latin-regular.woff2') format('woff2'),
+          url('./fonts/source-sans-pro-v21-latin-ext_latin-regular.woff') format('woff');
+      }
+    </style>
+
+    <style>
+      /* dark theme
+          * gb: 232323;
+          	negaative: c24938
+          	positive: 76cc20
+          	neutral: e9e9e9
+          	label: 9fadbc
+          	btn bg/fg : 7b7b7b / ~ffffff
+          	keyboard text color: f1f1f1 or f6f6f6
+          	text-color: f6f6f6
+          	untouched: 7f7f7f
+          	correct : ~ffffff
+          	corrected: ffa8a2
+          */
 
       :root {
         --background-color: #f4f4f4;
         --color: #222222;
+
         --label-color: #53606d;
         --negative-color: #eb6d57;
         --positive-color: #76cc20;
         --neutral-color: #2b2b2b;
+        --inactive-color: #888888;
+
+        --test-accent-color: #bdb76b;
 
         /** Keyboard */
         --border-width: 1px;

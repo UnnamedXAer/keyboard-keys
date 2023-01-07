@@ -3,11 +3,11 @@
   import Keyboard from '../components/Keyboard.svelte';
   import { loadContent, type Content, type Phrase } from '../helpers/text';
   import {
+    BACKSPACE_KEY_CODE,
     CharState,
     SPACE_CHAR,
     SPACE_SUBSTITUTE_CHAR,
     VISIBLE_KEYS,
-    VISIBLE_KEYS_TABLE,
     type VisibleKeys,
   } from '../constants/constants';
   import type { PhrasePosition } from './types';
@@ -124,7 +124,10 @@
       return;
     }
 
-    if (!VISIBLE_KEYS.includes(ev.code as VisibleKeys[number])) {
+    if (
+      ev.keyCode !== BACKSPACE_KEY_CODE &&
+      !VISIBLE_KEYS.includes(ev.code as VisibleKeys[number])
+    ) {
       return;
     }
 
@@ -141,7 +144,7 @@
   }
 
   function updatePhraseState(position: PhrasePosition, key: string, keyCode: number) {
-    if (keyCode === VISIBLE_KEYS_TABLE.Backspace) {
+    if (keyCode === BACKSPACE_KEY_CODE) {
       // TODO: remove duplicated update logic, decide the indexes and then do the update once;
 
       if (position.charIdx > 0) {
@@ -231,7 +234,12 @@
       : [];
 </script>
 
-<h1>hi there</h1>
+<nav>
+  <menu>
+    <li><a href="/learn-keys">Learn Keys</a></li>
+  </menu>
+  <hr />
+</nav>
 
 <main>
   <section id="controls">

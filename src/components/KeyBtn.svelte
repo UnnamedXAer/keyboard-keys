@@ -1,11 +1,16 @@
 <script lang="ts">
-  import type { AppKey } from 'src/models/key';
+  import type { AppKey } from '../models/key';
+  import type { CharState } from '../constants/constants';
 
   export let key: AppKey;
   export let active: boolean;
+  export let state: CharState | '' = '';
+  export let fontSize: string = '1rem';
 </script>
 
-<div class="{key.cssClass} {active ? 'active' : ''}">{key.label}</div>
+<div class="{key.cssClass} {active ? 'active' : ''} {state}" style="font-size: {fontSize};">
+  {key.label}
+</div>
 
 <style>
   div {
@@ -15,6 +20,8 @@
     border-radius: 4px;
     box-shadow: 1px 2px 3px #ccc;
     font-size: 1rem;
+
+    flex: 0 0 auto;
 
     text-align: center;
     display: grid;
@@ -57,7 +64,23 @@
   }
 
   .active {
-    background-color: #222;
+    background-color: #474747;
+    color: #f4f4f4;
+  }
+  .untouched,
+  .backspacedWrong {
+    color: var(--inactive-color);
+  }
+  .correct,
+  .corrected {
+    color: #058916;
+  }
+  .wrong {
+    color: #f53d36;
+  }
+
+  .active.untouched,
+  .active.backspacedWrong {
     color: #f4f4f4;
   }
 </style>

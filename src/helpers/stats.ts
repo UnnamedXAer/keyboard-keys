@@ -8,7 +8,7 @@ export type StartStopTime = {
 };
 
 export type PhraseMetadata = {
-  focusDurations: StartStopTime[];
+  focusPeriods: StartStopTime[];
   totalEntriesCnt: number;
   totalCorrectEntriesCnt: number;
   totalWrongEntriesCnt: number;
@@ -63,7 +63,7 @@ export function calculatePhraseStatsAndSummary(
   }
 
   let totalTime = 0;
-  metadata.focusDurations.forEach((x) => {
+  metadata.focusPeriods.forEach((x) => {
     totalTime = x.stop - x.start;
   });
   const timeMin = totalTime / 1000 / 60;

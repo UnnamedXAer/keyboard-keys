@@ -25,7 +25,7 @@
   import { LocalDb } from '../indexedDb/indexedDb';
 
   const getDefaultMetadata: () => PhraseMetadata = () => ({
-    focusDurations: [],
+    focusPeriods: [],
     totalCorrectEntriesCnt: 0,
     totalEntriesCnt: 0,
     totalWrongEntriesCnt: 0,
@@ -84,8 +84,8 @@
 
   function gatherStatsAndGetSummary() {
     if (phrase !== null && position === -1) {
-      if (currentMetadata.focusDurations.at(-1)!.stop === 0) {
-        currentMetadata.focusDurations.at(-1)!.stop = performance.now();
+      if (currentMetadata.focusPeriods.at(-1)!.stop === 0) {
+        currentMetadata.focusPeriods.at(-1)!.stop = performance.now();
       }
       phraseTestsHistory[phraseTestsHistory.length] = calculatePhraseStatsAndSummary(
         phrase,
@@ -136,7 +136,7 @@
     if (!isPhraseStarted) {
       isPhraseStarted = phrase![0][0].state !== CharState.untouched;
       if (isPhraseStarted) {
-        currentMetadata.focusDurations.push({ start: performance.now(), stop: 0 });
+        currentMetadata.focusPeriods.push({ start: performance.now(), stop: 0 });
       }
     }
 
@@ -202,7 +202,7 @@
   function focusHandler() {
     hasFocus = true;
     if (isPhraseStarted) {
-      currentMetadata.focusDurations.push({
+      currentMetadata.focusPeriods.push({
         start: performance.now(),
         stop: 0,
       });
@@ -212,7 +212,7 @@
   function blurHandler() {
     hasFocus = false;
     if (isPhraseStarted) {
-      const currentDuration = currentMetadata.focusDurations.at(-1)!;
+      const currentDuration = currentMetadata.focusPeriods.at(-1)!;
 
       if (currentDuration.start !== 0 && currentDuration.stop === 0) {
         currentDuration.stop = performance.now();

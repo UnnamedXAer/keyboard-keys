@@ -12,6 +12,8 @@
     VISIBLE_KEYS,
     type VisibleKeys,
   } from '../../constants/constants';
+  import type { Stats } from '../../components/statistics';
+  import { SingleKeysMetadata } from '../../helpers/singleKeysStats';
 
   const availableKeys = stringToAppKeys('qwertyuiopasdfghjklzxcvbnm');
 
@@ -33,12 +35,19 @@
   let keys: SingleKey[] = [];
   let position: Position = 0;
   let hasFocus: boolean = false;
+  let stats: Stats = {};
+  let metadata = new SingleKeysMetadata();
 
   function updateKeys() {
+    metadata.stopActivePeriod();
+    stats = metadata.getSingleKeysStats();
+
     const randomKeys: AppKey[] = [...Array(3)].map(
       () => availableKeys[~~(availableKeys.length * Math.random())]
     );
+    isStarted = false;
     keys = mapAppKeysToSingleKeys(randomKeys);
+    metadata.totalKeys += keys.length;
     position = 0;
   }
   updateKeys();
@@ -68,6 +77,9 @@
 
     if (!isStarted) {
       isStarted = keys[0].state !== CharState.untouched;
+      if (isStarted) {
+        metadata.startNewPeriod();
+      }
     }
 
     updatePosition();
@@ -86,6 +98,8 @@
       return;
     }
 
+    metadata.totalEntries++;
+
     if (
       keys[position].char === key ||
       (keys[position].char === SPACE_SUBSTITUTE_CHAR && key === SPACE_CHAR)
@@ -101,14 +115,21 @@
 
     keys[position].wrongEntries.push(key);
     keys[position].state = CharState.wrong;
+    metadata.totalWrongEntries++;
   }
 
   function focusHandler() {
     hasFocus = true;
+    if (isStarted) {
+      metadata.startNewPeriod();
+    }
   }
 
   function blurHandler() {
     hasFocus = false;
+    if (isStarted) {
+      metadata.stopActivePeriod();
+    }
   }
   $: activeChars = keys.length ? [keys[position]] : [];
 </script>
@@ -123,7 +144,7 @@
 <main>
   <section id="controls" />
   <section id="test">
-    <CurrentStats stats={{}} />
+    <CurrentStats stats={stats} />
     <KeysFields
       {error}
       {keys}

@@ -237,6 +237,7 @@
 <nav>
   <menu>
     <li><a href="/learn-keys">Learn Keys</a></li>
+    <li><a href="/user-text">Your text</a></li>
   </menu>
   <hr />
 </nav>
@@ -266,6 +267,11 @@
 </main>
 
 <style>
+  menu {
+    display: flex;
+    gap: 2rem;
+  }
+
   main {
     max-width: 1600px;
     min-width: var(--keyboard-width);

@@ -3,7 +3,8 @@ import { PhraseTestSummary } from '../helpers/stats';
 export class LocalDb {
   private static _instance: LocalDb;
   private readonly phraseSummaryStoreName = 'phrase-summary' as const;
-  private readonly version = 1 as const;
+  private readonly userTextStoreName = 'user-text' as const;
+  private readonly version = 2 as const;
   private readonly dbName = 'keyboarding-db' as const;
   private _db: IDBDatabase | null = null;
 
@@ -34,23 +35,37 @@ export class LocalDb {
       const requestOpenDb = indexedDB.open(this.dbName, this.version);
 
       requestOpenDb.onupgradeneeded = (ev) => {
+        const v1 = (db: IDBDatabase) => {
+          db.createObjectStore(this.phraseSummaryStoreName, {
+            keyPath: 'createdAt' satisfies keyof PhraseTestSummary,
+          });
+        };
+
+        const v2 = (db: IDBDatabase) => {
+          db.createObjectStore(this.userTextStoreName, {
+            autoIncrement: true,
+          });
+        };
+
         const db = requestOpenDb.result;
-        // db.version = 0 -> triggered when user had no database
-        db.createObjectStore('phrase-summary', {
-          keyPath: 'createdAt' satisfies keyof PhraseTestSummary,
-        });
+        // debugger;
+        v1(db);
+        v2(db);
       };
 
       requestOpenDb.onerror = (ev) => {
         console.log('IDBOpenDBRequest: error: ', requestOpenDb.error);
-        if (requestOpenDb.result.version < LocalDb._instance.version) {
+        if (
+          (ev.target as IDBOpenDBRequest | null)?.result &&
+          (ev.target as IDBOpenDBRequest).result.version < LocalDb._instance.version
+        ) {
           alert(
             'You have old javascript loaded, the website needs to be reloaded to \
 		work correctly. Use Ctrl+F5 to discard cached filed force load new ones.'
           );
         }
 
-        reject(requestOpenDb.error);
+        reject((requestOpenDb ?? ev.target ?? this.db)?.error);
       };
 
       requestOpenDb.onsuccess = (ev) => {
@@ -144,6 +159,56 @@ export class LocalDb {
 
       request.onsuccess = (ev) => {
         resolve();
+      };
+    });
+  }
+
+  getUserTexts(): Promise<string[]> {
+    return new Promise<string[]>((resolve, reject) => {
+      const transaction = this.db.transaction(this.userTextStoreName, 'readonly');
+      transaction.onerror = (ev) => {
+        ev.stopPropagation;
+        reject(request.error);
+      };
+
+      const store = transaction.objectStore(this.userTextStoreName);
+
+      const request = store.getAll();
+
+      request.onsuccess = (ev) => {
+        resolve(request.result);
+      };
+    });
+  }
+
+  saveUserText(text: string) {
+    return new Promise((resolve, reject) => {
+      const transaction = this.db.transaction(this.userTextStoreName, 'readwrite');
+      transaction.onerror = (ev) => {
+        ev.stopPropagation();
+        reject(request.error);
+      };
+
+      transaction.onabort = (ev) => {
+        console.log('saveUserText: transaction abort', ev);
+      };
+
+      const store = transaction.objectStore(this.userTextStoreName);
+
+      const request = store.add(text);
+
+      request.onerror = (ev) => {
+        if (request.error?.name == 'ConstraintError') {
+          ev.stopPropagation();
+          ev.preventDefault();
+          transaction.abort();
+          resolve((request || ev.target || this.db)?.error);
+          return;
+        }
+      };
+
+      request.onsuccess = (ev) => {
+        resolve(request.result);
       };
     });
   }

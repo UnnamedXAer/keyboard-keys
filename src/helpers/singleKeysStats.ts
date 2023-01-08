@@ -21,7 +21,6 @@ export class SingleKeysMetadata {
 
   sumUpPeriods() {
     const sum = this.focusPeriods.reduce((pv, cv) => pv + (cv.stop - cv.start), 0);
-    console.log(sum);
     this.focusPeriods = [{ start: 1, stop: sum + 1 }];
   }
 
@@ -45,8 +44,6 @@ export class SingleKeysMetadata {
       const sec = Math.round(totalTime - min * 60);
       totalTimeText = `${min}:${sec < 10 ? '0' + sec : sec} min`;
     }
-
-    console.log(totalTime, totalTimeText);
 
     return {
       totalKeys: {

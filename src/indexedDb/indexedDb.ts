@@ -147,7 +147,7 @@ export class LocalDb {
 
   deletePhraseSummary(createdAt: PhraseTestSummary['createdAt']): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      const transaction = this.db.transaction(this.phraseSummaryStoreName, 'readonly');
+      const transaction = this.db.transaction(this.phraseSummaryStoreName, 'readwrite');
       transaction.onerror = (ev) => {
         ev.stopPropagation;
         reject(request.error);
@@ -167,7 +167,7 @@ export class LocalDb {
     return new Promise<string[]>((resolve, reject) => {
       const transaction = this.db.transaction(this.userTextStoreName, 'readonly');
       transaction.onerror = (ev) => {
-        ev.stopPropagation;
+        ev.stopPropagation();
         reject(request.error);
       };
 
@@ -196,6 +196,56 @@ export class LocalDb {
       const store = transaction.objectStore(this.userTextStoreName);
 
       const request = store.add(text);
+
+      request.onerror = (ev) => {
+        if (request.error?.name == 'ConstraintError') {
+          ev.stopPropagation();
+          ev.preventDefault();
+          transaction.abort();
+          resolve((request || ev.target || this.db)?.error);
+          return;
+        }
+      };
+
+      request.onsuccess = (ev) => {
+        resolve(request.result);
+      };
+    });
+  }
+
+  deleteUserText(key: number): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      const transaction = this.db.transaction(this.userTextStoreName, 'readwrite');
+      transaction.onerror = (ev) => {
+        ev.stopPropagation();
+        reject(request.error);
+      };
+
+      const store = transaction.objectStore(this.userTextStoreName);
+
+      const request = store.delete(IDBKeyRange.only(key));
+
+      request.onsuccess = (ev) => {
+        resolve();
+      };
+    });
+  }
+
+  updateUserText(key: number, text: string) {
+    return new Promise((resolve, reject) => {
+      const transaction = this.db.transaction(this.userTextStoreName, 'readwrite');
+      transaction.onerror = (ev) => {
+        ev.stopPropagation();
+        reject(request.error);
+      };
+
+      transaction.onabort = (ev) => {
+        console.log('updateUserText: transaction abort', ev);
+      };
+
+      const store = transaction.objectStore(this.userTextStoreName);
+
+      const request = store.put(text, key);
 
       request.onerror = (ev) => {
         if (request.error?.name == 'ConstraintError') {

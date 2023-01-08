@@ -14,7 +14,7 @@ export function parseText(content: string): Phrase | null {
   }
   content = content.trim();
 
-  const throwOutEverythingElse = /[^'"?!;:/\\[{}\]\w\s-.,()]/g;
+  const throwOutEverythingElse = /[^'"?!;:/\\[{}\]\w\s-.,()ęóąśłżźćń]/gi;
 
   const words = content
     .toLowerCase()

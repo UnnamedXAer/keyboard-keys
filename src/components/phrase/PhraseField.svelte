@@ -14,6 +14,7 @@
   export let onFocusableBlur: (event: FocusEvent) => void;
   let focusableElement: HTMLElement | undefined;
   let cursorPos: CursorPosition | null = null;
+  let lastWordEl: Element | null = null;
 
   onMount(() => {
     focusableElement?.focus();
@@ -30,11 +31,22 @@
       nextCharPosition === -1 ||
       !focusableElement
     ) {
+      lastWordEl = null;
       return null;
     }
 
     const words = focusableElement.children;
     const wordEl = words[nextCharPosition.wordIdx + 1];
+
+    if (wordEl && lastWordEl !== wordEl) {
+      requestAnimationFrame(() => {
+        wordEl.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+      });
+    }
+    lastWordEl = wordEl;
 
     const targetEl = wordEl.children.item(nextCharPosition.charIdx) as HTMLElement | null;
     if (targetEl === null) {

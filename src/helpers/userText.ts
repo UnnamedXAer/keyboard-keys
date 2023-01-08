@@ -1,4 +1,5 @@
 import { LocalDb } from '../indexedDb/indexedDb';
+import { parseText, type Content } from './text';
 
 export function getUseMyText(): boolean {
   const useMyTextState = localStorage.getItem('use-my-text') ?? '0';
@@ -37,4 +38,17 @@ export async function updateMyText(key: number, text: string) {
   const db = new LocalDb();
   await db.open();
   return db.updateUserText(key, text);
+}
+
+export async function getMyTextsAsContents() {
+  const myTexts = await getMyTexts();
+  const contents = myTexts.map<Content>((x) => ({
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    phrase: parseText(x)!,
+    author: '',
+  }));
+  return {
+    page: 1,
+    contents,
+  };
 }

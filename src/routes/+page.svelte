@@ -8,6 +8,7 @@
     SPACE_CHAR,
     SPACE_SUBSTITUTE_CHAR,
     VISIBLE_KEYS,
+    VISIBLE_KEYS_TABLE,
     type VisibleKeys,
   } from '../constants/constants';
   import type { PhrasePosition } from './types';
@@ -23,6 +24,7 @@
   } from '../helpers/stats';
   import { onDestroy, onMount } from 'svelte';
   import { LocalDb } from '../indexedDb/indexedDb';
+  import { getMyTextsAsContents, getUseMyText } from '../helpers/userText';
 
   const getDefaultMetadata: () => PhraseMetadata = () => ({
     focusPeriods: [],
@@ -32,13 +34,14 @@
   });
 
   export let data: PageData;
-  const futureContents: {
+  let futureContents: {
     page: number;
-    phrases: Content[];
+    contents: Content[];
   } = {
     page: 0,
-    phrases: [],
+    contents: [],
   };
+  let useMyText: boolean = false;
   let content: Content | null = data.content;
   let phrase: Phrase | null = content?.phrase ?? null;
   let isPhraseStarted: boolean = false;
@@ -49,10 +52,15 @@
   let currentMetadata: PhraseMetadata = getDefaultMetadata();
   let hasFocus: boolean = false;
   $: error =
-    futureContents.phrases.length == 0 && phrase === null ? 'I do not have more phrases' : null;
+    futureContents.contents.length == 0 && phrase === null ? 'I do not have more phrases' : null;
 
   let idleCallback: number | null = null;
-  onMount(() => {
+  onMount(async () => {
+    useMyText = getUseMyText();
+    if (useMyText) {
+      futureContents = await getMyTextsAsContents();
+      updateContent();
+    }
     idleCallback = requestIdleCallback(
       async () => {
         const db = new LocalDb();
@@ -77,7 +85,16 @@
     gatherStatsAndGetSummary();
 
     isPhraseStarted = false;
-    content = await loadContent(fetch);
+    if (futureContents.contents.length > 0) {
+      content = futureContents.contents.shift()!;
+    } else {
+      if (useMyText) {
+        futureContents = await getMyTextsAsContents();
+        content = futureContents.contents.shift() ?? null;
+      } else {
+        content = await loadContent(fetch);
+      }
+    }
     phrase = content?.phrase ?? null;
     updatePosition(phrase);
   }
@@ -129,6 +146,10 @@
       !VISIBLE_KEYS.includes(ev.code as VisibleKeys[number])
     ) {
       return;
+    }
+
+    if (ev.keyCode === VISIBLE_KEYS_TABLE.Space) {
+      ev.preventDefault(); // do not scroll on space
     }
 
     updatePhraseState(position, ev.key, ev.keyCode);
@@ -220,11 +241,10 @@
     }
   }
 
-  const buttonClickHandler = () => {
-    updateContent();
+  const buttonClickHandler = async () => {
+    await updateContent();
     requestAnimationFrame(() => {
       document.querySelector<HTMLElement>('#focusable-area')?.focus();
-      requestAnimationFrame(() => console.log(document.activeElement));
     });
   };
 
@@ -246,7 +266,21 @@
   <section id="controls">
     <label for="isPhraseStarted">
       is Phrase Started:
-      <input type="checkbox" name="yes" id="isPhraseStarted" bind:checked={isPhraseStarted} />
+      <input
+        type="checkbox"
+        id="isPhraseStarted"
+        checked={isPhraseStarted}
+        on:click={(ev) => (ev.returnValue = false)}
+      />
+    </label>
+    <label for="useMyText">
+      Use my text:
+      <input
+        type="checkbox"
+        id="useMyText"
+        checked={useMyText}
+        on:click={(ev) => (ev.returnValue = false)}
+      />
     </label>
     <button on:click={buttonClickHandler}>reset</button>
   </section>
@@ -256,7 +290,7 @@
       {error}
       {phrase}
       {isPhraseStarted}
-      author={content?.author}
+      author={content?.author ?? ''}
       nextCharPosition={hasFocus ? position : null}
       onFocusableKeyDown={keyDownHandler}
       onFocusableFocus={focusHandler}
@@ -280,6 +314,7 @@
     display: flex;
     flex-direction: row;
     gap: 0.3rem;
+    margin-bottom: 1rem;
   }
 
   #test {

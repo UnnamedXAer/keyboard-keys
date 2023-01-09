@@ -12,21 +12,27 @@ export function parseText(content: string): Phrase | null {
   if (!content) {
     return null;
   }
-  content = content.trim();
 
   const throwOutEverythingElse = /[^'"?!;:/\\[{}\]\w\s-.,()ęóąśłżźćń]/gi;
 
   const words = content
+    .trim()
     .toLowerCase()
+    .replaceAll(/\s\n*/g, SPACE_CHAR)
+    .replaceAll(/’/g, "'")
+    .replaceAll(/„/g, '"')
+    .replaceAll(/“/g, '"')
+    .replaceAll(/”/g, '"')
+    .replaceAll(/–/g, '-')
+    // .replaceAll(/=/g, '=')
+    // .replaceAll(/\+/g, '+')
     .replaceAll(throwOutEverythingElse, SPACE_CHAR)
     .replaceAll(/\s{2,}/g, SPACE_CHAR)
     .split(SPACE_CHAR);
 
-  const text: NonNullable<Phrase | null> = words.map((word, wordIdx) => {
+  const text: NonNullable<Phrase | null> = words.map((word) => {
     const chars: string[] = word.split('');
-    if (wordIdx < words.length - 1) {
-      chars.push(SPACE_SUBSTITUTE_CHAR);
-    }
+    chars.push(SPACE_SUBSTITUTE_CHAR);
     return chars.map((char) => ({
       char,
       state: CharState.untouched,

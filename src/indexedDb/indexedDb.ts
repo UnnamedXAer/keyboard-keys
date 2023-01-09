@@ -1,4 +1,5 @@
 import { PhraseTestSummary } from '../helpers/stats';
+import type { UserText } from '../models/userText';
 
 export class LocalDb {
   private static _instance: LocalDb;
@@ -163,25 +164,40 @@ export class LocalDb {
     });
   }
 
-  getUserTexts(): Promise<string[]> {
-    return new Promise<string[]>((resolve, reject) => {
+  getUserTexts(): Promise<UserText[]> {
+    return new Promise<UserText[]>((resolve, reject) => {
       const transaction = this.db.transaction(this.userTextStoreName, 'readonly');
       transaction.onerror = (ev) => {
         ev.stopPropagation();
-        reject(request.error);
+        reject(transaction.error);
       };
+      const data: UserText[] = [];
 
       const store = transaction.objectStore(this.userTextStoreName);
 
-      const request = store.getAll();
+      const request = store.openCursor();
 
       request.onsuccess = (ev) => {
-        resolve(request.result);
+        const cursor = request.result;
+        if (cursor === null) {
+          return resolve(data);
+        }
+
+        data.push({
+          key: cursor.key as number,
+          text: cursor.value,
+        });
+
+        cursor.continue();
+      };
+      request.onerror = (ev) => {
+        ev.stopPropagation();
+        reject(request.error);
       };
     });
   }
 
-  saveUserText(text: string) {
+  saveUserText(text: string): Promise<number> {
     return new Promise((resolve, reject) => {
       const transaction = this.db.transaction(this.userTextStoreName, 'readwrite');
       transaction.onerror = (ev) => {
@@ -202,13 +218,13 @@ export class LocalDb {
           ev.stopPropagation();
           ev.preventDefault();
           transaction.abort();
-          resolve((request || ev.target || this.db)?.error);
+          reject((request || ev.target || this.db)?.error);
           return;
         }
       };
 
       request.onsuccess = (ev) => {
-        resolve(request.result);
+        resolve(request.result as number);
       };
     });
   }

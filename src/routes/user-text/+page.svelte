@@ -1,10 +1,17 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { deleteMyText, getMyTexts, getUseMyText, saveMyText, updateMyText } from '../../helpers/userText';
+  import {
+    deleteMyText,
+    getMyTexts,
+    getUseMyText,
+    saveMyText,
+    updateMyText,
+  } from '../../helpers/userText';
+  import type { UserText } from '../../models/userText';
 
   let isLoading = true;
   let progress = 0.04;
-  let texts: string[] = [];
+  let texts: UserText[] = [];
   let newText = '';
   let editKey = -1;
   let useMyText = false;
@@ -13,7 +20,7 @@
     updateProgress();
     texts = await getMyTexts();
     isLoading = false;
-    
+
     useMyText = getUseMyText();
   });
 
@@ -33,10 +40,14 @@
     }
     if (editKey > -1) {
       await updateMyText(editKey, newText);
-      texts[editKey] = newText.trim();
+      const updatedText = texts.find((x) => x.key === editKey);
+      if (updatedText) {
+        updatedText.text = newText.trim();
+      }
     } else {
-      await saveMyText(newText);
-      texts.push(newText.trim());
+      const newTextKey = await saveMyText(newText);
+      debugger
+      texts.push({ text: newText.trim(), key: newTextKey });
     }
     texts = texts;
     clearHandler();
@@ -47,15 +58,21 @@
     editKey = -1;
   }
 
-  async function editHandler(idx: number) {
-    newText = texts[idx];
-    editKey = idx + 1;
+  async function editHandler(key: number) {
+    newText = texts.find((x) => x.key === key)!.text;
+    editKey = key;
   }
-  async function deleteHandler(idx: number) {
-    if (confirm('Are you sure you want delete text no. ' + (idx + 1) + '?')) {
-      await deleteMyText(idx + 1);
-      texts.splice(idx, 1);
-      texts = texts;
+
+  async function deleteHandler(key: number) {
+    const idx = texts.findIndex((x) => x.key === key);
+
+    if (idx === -1 || !confirm('Are you sure you want delete text no. ' + (idx + 1) + '?')) {
+      return;
+    }
+    await deleteMyText(key);
+    texts = texts.filter((x) => x.key !== key);
+    if (key === editKey) {
+      clearHandler();
     }
   }
 </script>
@@ -106,13 +123,13 @@
       <progress value={progress} />
     {:else}
       <ol>
-        {#each texts as text, idx}
+        {#each texts as text}
           <li>
             <article class="text-container">
-              <p>{text}</p>
+              <p>{text.text}</p>
               <div class="text-actions">
-                <button on:click={() => editHandler(idx)}>🖋️</button>
-                <button on:click={() => deleteHandler(idx)}>❌</button>
+                <button on:click={() => editHandler(text.key)}>🖋️</button>
+                <button on:click={() => deleteHandler(text.key)}>❌</button>
               </div>
             </article>
           </li>

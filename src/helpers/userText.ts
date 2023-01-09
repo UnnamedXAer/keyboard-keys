@@ -1,4 +1,5 @@
 import { LocalDb } from '../indexedDb/indexedDb';
+import type { UserText } from '../models/userText';
 import { parseText, type Content } from './text';
 
 export function getUseMyText(): boolean {
@@ -6,13 +7,13 @@ export function getUseMyText(): boolean {
   return !!+useMyTextState;
 }
 
-export async function getMyTexts(): Promise<string[]> {
+export async function getMyTexts(): Promise<UserText[]> {
   const db = new LocalDb();
   await db.open();
   return await db.getUserTexts();
 }
 
-export async function saveMyText(text: string) {
+export async function saveMyText(text: string): Promise<number> {
   text = text.trim();
 
   if (text.length < 10) {
@@ -44,7 +45,7 @@ export async function getMyTextsAsContents() {
   const myTexts = await getMyTexts();
   const contents = myTexts.map<Content>((x) => ({
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    phrase: parseText(x)!,
+    phrase: parseText(x.text)!,
     author: '',
   }));
   return {

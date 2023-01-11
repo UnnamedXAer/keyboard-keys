@@ -1,5 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import Navbar from '../../components/Navbar.svelte';
+  import UseMyTextsSwitch from '../../components/UseMyTextsSwitch.svelte';
   import {
     deleteMyText,
     getMyTexts,
@@ -14,14 +16,11 @@
   let texts: UserText[] = [];
   let newText = '';
   let editKey = -1;
-  let useMyText = false;
 
   onMount(async () => {
     updateProgress();
     texts = await getMyTexts();
     isLoading = false;
-
-    useMyText = getUseMyText();
   });
 
   function updateProgress() {
@@ -46,7 +45,6 @@
       }
     } else {
       const newTextKey = await saveMyText(newText);
-      debugger
       texts.push({ text: newText.trim(), key: newTextKey });
     }
     texts = texts;
@@ -77,27 +75,10 @@
   }
 </script>
 
-<nav>
-  <menu>
-    <li><a href="/">Home</a></li>
-  </menu>
-  <hr />
-</nav>
-
+<Navbar />
 <main>
   <section id="controls">
-    <label for="isPhraseStarted">
-      Use my text:
-      <input
-        type="checkbox"
-        name="yes"
-        id="isPhraseStarted"
-        disabled={isLoading}
-        bind:checked={useMyText}
-        on:change={(ev) =>
-          localStorage.setItem('use-my-text', `${Number(ev.currentTarget.checked)}`)}
-      />
-    </label>
+    <UseMyTextsSwitch />
   </section>
   <section id="newTextContainer">
     <form on:submit|preventDefault={saveTextHandler}>

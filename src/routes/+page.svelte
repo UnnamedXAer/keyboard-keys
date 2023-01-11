@@ -25,6 +25,7 @@
   import { onDestroy, onMount } from 'svelte';
   import { LocalDb } from '../indexedDb/indexedDb';
   import { getMyTextsAsContents, getUseMyText } from '../helpers/userText';
+  import Navbar from '../components/Navbar.svelte';
 
   const getDefaultMetadata: () => PhraseMetadata = () => ({
     focusPeriods: [],
@@ -51,10 +52,10 @@
   let phraseTestsHistory: PhraseTestSummary[] = [];
   let currentMetadata: PhraseMetadata = getDefaultMetadata();
   let hasFocus: boolean = false;
+  let idleCallback: number | null = null;
   $: error =
     futureContents.contents.length == 0 && phrase === null ? 'I do not have more phrases' : null;
 
-  let idleCallback: number | null = null;
   onMount(async () => {
     useMyText = getUseMyText();
     if (useMyText) {
@@ -254,13 +255,7 @@
       : [];
 </script>
 
-<nav>
-  <menu>
-    <li><a href="/learn-keys">Learn Keys</a></li>
-    <li><a href="/user-text">Your text</a></li>
-  </menu>
-  <hr />
-</nav>
+<Navbar />
 
 <main>
   <section id="controls">
@@ -301,11 +296,6 @@
 </main>
 
 <style>
-  menu {
-    display: flex;
-    gap: 2rem;
-  }
-
   main {
     max-width: 1600px;
     min-width: var(--keyboard-width);

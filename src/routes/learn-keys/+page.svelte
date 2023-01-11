@@ -14,6 +14,7 @@
   } from '../../constants/constants';
   import type { Stats } from '../../components/statistics';
   import { SingleKeysMetadata } from '../../helpers/singleKeysStats';
+  import Navbar from '../../components/Navbar.svelte';
 
   const availableKeys = stringToAppKeys('qwertyuiopasdfghjklzxcvbnm');
 
@@ -134,17 +135,12 @@
   $: activeChars = keys.length ? [keys[position]] : [];
 </script>
 
-<nav>
-  <menu>
-    <li><a href="/">Learn Typing</a></li>
-  </menu>
-  <hr />
-</nav>
+<Navbar />
 
 <main>
   <section id="controls" />
   <section id="test">
-    <CurrentStats stats={stats} />
+    <CurrentStats {stats} />
     <KeysFields
       {error}
       {keys}

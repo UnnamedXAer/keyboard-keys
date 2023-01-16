@@ -1,16 +1,27 @@
 import { LocalDb } from '../indexedDb/indexedDb';
+import type { Settings } from '../models/settings';
 import type { UserText } from '../models/userText';
 import { parseText, type Content } from './text';
 
-export function getUseMyText(): boolean {
-  const useMyTextState = localStorage.getItem('use-my-text') ?? '0';
-  return !!+useMyTextState;
+export async function getSettings(): Promise<Settings> {
+  const db = new LocalDb();
+  try {
+    await db.open();
+    const result = await db.getSettings();
+    db.close();
+    return result;
+  } catch (err) {
+    db.close();
+    throw err;
+  }
 }
 
 export async function getMyTexts(): Promise<UserText[]> {
   const db = new LocalDb();
   await db.open();
-  return await db.getUserTexts();
+  const result = await db.getUserTexts();
+  db.close();
+  return result;
 }
 
 export async function saveMyText(text: string): Promise<number> {
@@ -21,13 +32,17 @@ export async function saveMyText(text: string): Promise<number> {
   }
   const db = new LocalDb();
   await db.open();
-  return db.saveUserText(text);
+  const result = await db.saveUserText(text);
+  db.close();
+  return result;
 }
 
 export async function deleteMyText(key: number) {
   const db = new LocalDb();
   await db.open();
-  return db.deleteUserText(key);
+  const result = await db.deleteUserText(key);
+  db.close();
+  return result;
 }
 
 export async function updateMyText(key: number, text: string) {
@@ -38,7 +53,9 @@ export async function updateMyText(key: number, text: string) {
   }
   const db = new LocalDb();
   await db.open();
-  return db.updateUserText(key, text);
+  const result = await db.updateUserText(key, text);
+  db.close();
+  return result;
 }
 
 export async function getMyTextsAsContents() {

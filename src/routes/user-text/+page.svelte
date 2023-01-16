@@ -5,10 +5,12 @@
   import {
     deleteMyText,
     getMyTexts,
-    getUseMyText,
+    getSettings,
     saveMyText,
     updateMyText,
   } from '../../helpers/userText';
+  import { LocalDb } from '../../indexedDb/indexedDb';
+  import { Settings } from '../../models/settings';
   import type { UserText } from '../../models/userText';
 
   let isLoading = true;
@@ -16,12 +18,22 @@
   let texts: UserText[] = [];
   let newText = '';
   let editKey = -1;
+  let settings = new Settings();
 
   onMount(async () => {
     updateProgress();
+    readSettings();
     texts = await getMyTexts();
     isLoading = false;
   });
+
+  async function readSettings() {
+    try {
+      settings = await getSettings();
+    } catch (err) {
+      console.log('read settings: ', err);
+    }
+  }
 
   function updateProgress() {
     requestAnimationFrame(() => {
@@ -78,7 +90,7 @@
 <Navbar />
 <main>
   <section id="controls">
-    <UseMyTextsSwitch />
+    <UseMyTextsSwitch useMyText={settings.useMyTexts} disabled />
   </section>
   <section id="newTextContainer">
     <form on:submit|preventDefault={saveTextHandler}>

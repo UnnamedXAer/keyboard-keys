@@ -1,11 +1,14 @@
+import type { Nullable } from 'vitest';
 import { PhraseTestSummary } from '../helpers/stats';
+import { Settings } from '../models/settings';
 import type { UserText } from '../models/userText';
 
 export class LocalDb {
   private static _instance: LocalDb;
   private readonly phraseSummaryStoreName = 'phrase-summary' as const;
   private readonly userTextStoreName = 'user-text' as const;
-  private readonly version = 2 as const;
+  private readonly settingsStoreName = 'settings' as const;
+  private readonly version = 3 as const;
   private readonly dbName = 'keyboarding-db' as const;
   private _db: IDBDatabase | null = null;
 
@@ -48,10 +51,24 @@ export class LocalDb {
           });
         };
 
+        const v3 = (db: IDBDatabase) => {
+          db.createObjectStore(this.settingsStoreName, {
+            autoIncrement: false,
+          });
+        };
+
         const db = requestOpenDb.result;
         // debugger;
-        v1(db);
-        v2(db);
+        switch (db.version) {
+          case 1:
+            v1(db);
+          // eslint-disable-next-line no-fallthrough
+          case 2:
+            v2(db);
+          // eslint-disable-next-line no-fallthrough
+          case 3:
+            v3(db);
+        }
       };
 
       requestOpenDb.onerror = (ev) => {
@@ -268,7 +285,71 @@ export class LocalDb {
           ev.stopPropagation();
           ev.preventDefault();
           transaction.abort();
-          resolve((request || ev.target || this.db)?.error);
+          reject((request || ev.target || this.db)?.error);
+          return;
+        }
+      };
+
+      request.onsuccess = (ev) => {
+        resolve(request.result);
+      };
+    });
+  }
+
+  getSettings() {
+    return new Promise<Settings>((resolve, reject) => {
+      const transaction = this.db.transaction(this.settingsStoreName, 'readonly');
+      transaction.onerror = (ev) => {
+        ev.stopPropagation();
+        reject(request.error);
+      };
+
+      transaction.onabort = (ev) => {
+        console.log('get settings: transaction abort', ev);
+      };
+
+      const store = transaction.objectStore(this.settingsStoreName);
+
+      const request = store.get(1);
+
+      request.onerror = (ev) => {
+        ev.stopPropagation();
+        reject((request || ev.target || this.db)?.error);
+        return;
+      };
+
+      request.onsuccess = (ev) => {
+        if (request.result) {
+          debugger;
+        }
+        const settings = new Settings((request.result as Nullable<Partial<Settings>>) || {});
+        resolve(settings);
+      };
+    });
+  }
+
+  updateSettings(settings: Settings) {
+    return new Promise((resolve, reject) => {
+      const transaction = this.db.transaction(this.settingsStoreName, 'readwrite');
+      transaction.onerror = (ev) => {
+        ev.stopPropagation();
+        reject(request.error);
+      };
+
+      transaction.onabort = (ev) => {
+        console.log('update settings: transaction abort', ev);
+      };
+
+      const store = transaction.objectStore(this.settingsStoreName);
+
+      const request = store.put(settings, 1);
+
+      request.onerror = (ev) => {
+        if (request.error?.name == 'ConstraintError') {
+          ev.stopPropagation();
+          ev.preventDefault();
+          transaction.abort();
+          reject((request || ev.target || this.db)?.error);
           return;
         }
       };

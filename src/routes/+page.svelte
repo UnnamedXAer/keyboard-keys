@@ -24,8 +24,9 @@
   } from '../helpers/stats';
   import { onDestroy, onMount } from 'svelte';
   import { LocalDb } from '../indexedDb/indexedDb';
-  import { getMyTextsAsContents, getUseMyText } from '../helpers/userText';
+  import { getMyTextsAsContents, getSettings } from '../helpers/userText';
   import Navbar from '../components/Navbar.svelte';
+  import { Settings } from '../models/settings';
 
   const getDefaultMetadata: () => PhraseMetadata = () => ({
     focusPeriods: [],
@@ -42,7 +43,7 @@
     page: 0,
     contents: [],
   };
-  let useMyText: boolean = false;
+  let settings = new Settings();
   let content: Content | null = data.content;
   let phrase: Phrase | null = content?.phrase ?? null;
   let isPhraseStarted: boolean = false;
@@ -57,8 +58,8 @@
     futureContents.contents.length == 0 && phrase === null ? 'I do not have more phrases' : null;
 
   onMount(async () => {
-    useMyText = getUseMyText();
-    if (useMyText) {
+    settings = await getSettings();
+    if (settings.useMyTexts) {
       futureContents = await getMyTextsAsContents();
       updateContent();
     }
@@ -89,7 +90,7 @@
     if (futureContents.contents.length > 0) {
       content = futureContents.contents.shift()!;
     } else {
-      if (useMyText) {
+      if (settings.useMyTexts) {
         futureContents = await getMyTextsAsContents();
         content = futureContents.contents.shift() ?? null;
       } else {
@@ -242,13 +243,6 @@
     }
   }
 
-  const buttonClickHandler = async () => {
-    await updateContent();
-    requestAnimationFrame(() => {
-      document.querySelector<HTMLElement>('#focusable-area')?.focus();
-    });
-  };
-
   $: activeChars =
     hasFocus && position !== -1 && phrase !== null
       ? [phrase[position!.wordIdx][position!.charIdx]]
@@ -258,27 +252,7 @@
 <Navbar />
 
 <main>
-  <section id="controls">
-    <label for="isPhraseStarted">
-      is Phrase Started:
-      <input
-        type="checkbox"
-        id="isPhraseStarted"
-        checked={isPhraseStarted}
-        on:click={(ev) => (ev.returnValue = false)}
-      />
-    </label>
-    <label for="useMyText">
-      Use my text:
-      <input
-        type="checkbox"
-        id="useMyText"
-        checked={useMyText}
-        on:click={(ev) => (ev.returnValue = false)}
-      />
-    </label>
-    <button on:click={buttonClickHandler}>reset</button>
-  </section>
+  <section id="controls" />
   <section id="test">
     <CurrentStats stats={stats || {}} />
     <PhraseField

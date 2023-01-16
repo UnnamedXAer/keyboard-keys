@@ -1,26 +1,26 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { getUseMyText } from '../helpers/userText';
+  import type { Settings } from '../models/settings';
 
-  let useMyText: boolean = false;
-  let loading: boolean = true;
-
-  onMount(() => {
-    useMyText = getUseMyText();
-    loading = false;
-  });
+  export let useMyText: boolean;
+  export let disabled: boolean = false;
+  export let onChange: ((key: keyof Settings, value: any) => void) | undefined = void 0;
 </script>
 
-<label for="isPhraseStarted" title="Toggle use my texts">
+<label for="useMyTexts" title="Toggle use my texts">
   Use my text:
   <input
     type="checkbox"
-    name="yes"
-    id="isPhraseStarted"
-    disabled={loading}
-    bind:checked={useMyText}
+    id="useMyTexts"
+    {disabled}
+    checked={useMyText}
     on:change={(ev) => {
-      localStorage.setItem('use-my-text', `${Number(ev.currentTarget.checked)}`);
+      onChange && onChange('useMyTexts', ev.currentTarget.checked);
     }}
   />
 </label>
+
+<style>
+  label:has(input[readonly]) {
+    pointer-events: none;
+  }
+</style>

@@ -3,6 +3,7 @@
   import { onMount } from 'svelte';
   import Cursor from './Cursor.svelte';
   import type { PhrasePosition, CursorPosition } from '../../routes/types';
+  import { SPACE_SUBSTITUTE_CHAR } from '../../constants/constants';
 
   export let error: String | null;
   export let phrase: Phrase | null;
@@ -95,7 +96,7 @@
       {#each phrase as word}
         <span class="word">
           {#each word as char}
-            <span class="char {char.state}"
+            <span class="char {char.state}" class:space={char.char === SPACE_SUBSTITUTE_CHAR}
               >{char.char}
               <div class="entries" title="{char.char}:&#013;{char.wrongEntries.join(', ')}">
                 {char.wrongEntries.join(',')}
@@ -203,5 +204,9 @@
   }
   .wrong {
     color: var(--wrong-color);
+  }
+
+  .space.untouched {
+    opacity: 0.3;
   }
 </style>

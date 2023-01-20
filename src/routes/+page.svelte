@@ -1,7 +1,7 @@
 <script lang="ts">
   import { findNextCharPosition } from '../helpers/keys';
   import Keyboard from '../components/Keyboard.svelte';
-  import { loadContent, type Content, type Phrase } from '../helpers/text';
+  import { loadContent, rawPhraseToContent, type Content, type Phrase } from '../helpers/text';
   import {
     BACKSPACE_KEY_CODE,
     CharState,
@@ -44,10 +44,10 @@
     contents: [],
   };
   let settings = new Settings();
-  let content: Content | null = data.content;
-  let phrase: Phrase | null = content?.phrase ?? null;
+  let content: Content | null = null;
+  let phrase: Phrase | null = null;
   let isPhraseStarted: boolean = false;
-  let position: PhrasePosition | null | -1 = findNextCharPosition(phrase);
+  let position: PhrasePosition | null | -1 = null;
   let error: String | null = null;
   let stats: Stats | null = null;
   let phraseTestsHistory: PhraseTestSummary[] = [];
@@ -55,13 +55,19 @@
   let hasFocus: boolean = false;
   let idleCallback: number | null = null;
   $: error =
-    futureContents.contents.length == 0 && phrase === null ? 'I do not have more phrases' : null;
+    position === -1 && futureContents.contents.length == 0 && phrase === null
+      ? 'I do not have more phrases'
+      : null;
 
   onMount(async () => {
     settings = await getSettings();
     if (settings.useMyTexts) {
-      futureContents = await getMyTextsAsContents();
+      futureContents = await getMyTextsAsContents(settings);
       updateContent();
+    } else {
+      content = rawPhraseToContent(data.rawPhrase, settings);
+      phrase = content?.phrase ?? null;
+      updatePosition(phrase);
     }
     idleCallback = requestIdleCallback(
       async () => {
@@ -91,10 +97,10 @@
       content = futureContents.contents.shift()!;
     } else {
       if (settings.useMyTexts) {
-        futureContents = await getMyTextsAsContents();
+        futureContents = await getMyTextsAsContents(settings);
         content = futureContents.contents.shift() ?? null;
       } else {
-        content = await loadContent(fetch);
+        content = await loadContent(settings);
       }
     }
     phrase = content?.phrase ?? null;

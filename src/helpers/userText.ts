@@ -58,11 +58,11 @@ export async function updateMyText(key: number, text: string) {
   return result;
 }
 
-export async function getMyTextsAsContents() {
+export async function getMyTextsAsContents(settings: Settings) {
   const myTexts = await getMyTexts();
   const contents = myTexts.map<Content>((x) => ({
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    phrase: parseText(x.text)!,
+    phrase: parseText(x.text, settings)!,
     author: '',
   }));
   return {

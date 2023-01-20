@@ -1,6 +1,8 @@
 import { CharState, SPACE_CHAR, SPACE_SUBSTITUTE_CHAR } from '../constants/constants';
 import type { TextChar } from '../models/key';
+import type { Settings } from '../models/settings';
 
+export type PhraseRaw = { text: string; author: string };
 export type Phrase = TextChar[][];
 export type Content = { phrase: Phrase; author: string };
 
@@ -8,27 +10,32 @@ const MIN_LENGTH = 10;
 const MAX_LENGTH = 80;
 const PAGE_SIZE = 3;
 
-export function parseText(content: string): Phrase | null {
+export function parseText(content: string, settings: Settings): Phrase | null {
   if (!content) {
     return null;
   }
 
   const throwOutEverythingElse = /[^'"?!;:/\\[{}\]\w\s-.,()ęóąśłżźćń]/gi;
 
-  const words = content
+  content = content
     .trim()
-    .toLowerCase()
     .replaceAll(/\s\n*/g, SPACE_CHAR)
     .replaceAll(/’/g, "'")
     .replaceAll(/„/g, '"')
     .replaceAll(/“/g, '"')
     .replaceAll(/”/g, '"')
     .replaceAll(/–/g, '-')
+    // TODO: these chars
     // .replaceAll(/=/g, '=')
     // .replaceAll(/\+/g, '+')
     .replaceAll(throwOutEverythingElse, SPACE_CHAR)
-    .replaceAll(/\s{2,}/g, SPACE_CHAR)
-    .split(SPACE_CHAR);
+    .replaceAll(/\s{2,}/g, SPACE_CHAR);
+
+  if (!settings.allowCapitalLetters) {
+    content = content.toLowerCase();
+  }
+
+  const words = content.split(SPACE_CHAR);
 
   const text: NonNullable<Phrase | null> = words.map((word) => {
     const chars: string[] = word.split('');
@@ -65,7 +72,7 @@ export async function getPhrasesPage(
 
 export async function getRandomPhrase(
   fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>
-): Promise<{ text: string; author: string } | null> {
+): Promise<PhraseRaw | null> {
   const url = `https://api.quotable.io/random?minLength=${MIN_LENGTH}&maxLength=${MAX_LENGTH}`;
   const res = await fetch(url);
   if (!res.ok) {
@@ -79,16 +86,12 @@ export async function getRandomPhrase(
   };
 }
 
-export async function loadContent(
-  fetch: (input: RequestInfo | URL, init?: RequestInit | undefined) => Promise<Response>
-): Promise<Content | null> {
-  const data = await getRandomPhrase(fetch);
-
+export function rawPhraseToContent(data: PhraseRaw | null, settings: Settings): Content | null {
   if (data === null) {
     return null;
   }
 
-  const phrase = parseText(data.text);
+  const phrase = parseText(data.text, settings);
 
   if (phrase === null) {
     return null;
@@ -98,4 +101,9 @@ export async function loadContent(
     author: data.author,
     phrase,
   };
+}
+
+export async function loadContent(settings: Settings): Promise<Content | null> {
+  const data = await getRandomPhrase(fetch);
+  return rawPhraseToContent(data, settings);
 }

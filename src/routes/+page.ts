@@ -1,9 +1,8 @@
-import { loadContent } from '../helpers/text';
+import { getRandomPhrase } from '../helpers/text';
 import type { PageLoad } from './$types';
 
-export const load = ((args) => {
-	// console.log('LOAD', args);
+export const load = (({ fetch }) => {
   return {
-    content: loadContent(args.fetch),
+    rawPhrase: getRandomPhrase(fetch),
   };
 }) satisfies PageLoad;

@@ -124,17 +124,18 @@
   }
 
   article {
-    margin: 2rem 2rem;
+    position: relative;
+    margin: 1rem;
+    padding: 1rem;
     font-size: var(--phrase-font-size);
     letter-spacing: 0.25rem;
     line-height: 1.3;
-    position: relative;
     user-select: none;
     text-align: center;
     outline: none;
   }
 
-  article:not(:focus)::before {
+  article:not(:focus)::after {
     content: '';
     position: absolute;
     left: 0;
@@ -142,10 +143,9 @@
     right: 0;
     bottom: 0;
     backdrop-filter: blur(0.07em);
-    margin: -20px;
   }
 
-  article:not(:focus) address:before {
+  article:not(:focus) address::after {
     content: '';
     position: absolute;
     left: 0;
@@ -153,7 +153,6 @@
     right: 0;
     bottom: 0;
     backdrop-filter: blur(0.12em);
-    margin: -20px;
   }
 
   address {
@@ -164,7 +163,7 @@
     font-style: italic;
     letter-spacing: normal;
     color: var(--inactive-color);
-    z-index: 1;
+    padding: 5px;
   }
 
   .word {

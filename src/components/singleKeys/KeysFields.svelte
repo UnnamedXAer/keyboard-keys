@@ -53,18 +53,17 @@
       <p style="font-size: 2rem;">There were some problem, please try to refresh the page.</p>
     {/if}
   </article>
-  <span class="mask" />
 </section>
 
 <style>
   section {
     min-height: calc(var(--key-base-size) + 2 * 2rem);
-    position: relative;
   }
 
   article {
     --gap: 1rem;
 
+    position: relative;
     overflow-y: hidden;
     overflow-x: auto;
     scroll-behavior: smooth;
@@ -73,18 +72,16 @@
     min-width: calc(3 * var(--key-base-size) + 2 * var(--gap) + 2 * 1rem + 2 * 20px);
     min-height: calc(var(--key-base-size) + 2 * 1rem);
 
-    padding-left: 1rem;
-    padding-right: 1rem;
-    margin: 2rem 2rem 1rem 2rem;
+    padding: 1rem;
+    margin: 1rem 2rem 1rem 2rem;
     user-select: none;
-    position: relative;
     outline: none;
 
     font-family: 'Source Sans Pro';
   }
 
-  /* article:not(:focus)::before { */
-  article:not(:focus) + .mask {
+  article:not(:focus)::after {
+    content: '';
     position: absolute;
     left: 0px;
     top: 0px;
@@ -103,7 +100,6 @@
 
   .key-wrapper {
     position: relative;
-    z-index: 1;
   }
 
   .key-wrapper > .entries {

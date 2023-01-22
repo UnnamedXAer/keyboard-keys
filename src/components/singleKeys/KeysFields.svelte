@@ -10,10 +10,45 @@
   export let onFocusableFocus: (event: FocusEvent) => void;
   export let onFocusableBlur: (event: FocusEvent) => void;
   let focusableElement: HTMLElement | undefined;
+  let visibleKeysNo = 9; // keep it odd
+  let passedKeys = 0;
+  let endDumbKeys = new Array((visibleKeysNo - 1) / 2);
+  // let keySize = 55 + 2;
 
   onMount(() => {
     focusableElement?.focus();
+
+    // const root = document.querySelector(':root')!;
+    // const styles = getComputedStyle(root);
+    // const btnSize = styles.getPropertyValue('--key-base-size');
+    // keySize = parseInt(btnSize) || keySize;
+    // console.log('---key size', keySize, btnSize);
   });
+
+  $: {
+    if (focusableElement && keys !== null) {
+      const children = (focusableElement.firstChild as HTMLDivElement).children;
+      console.log(children);
+      const target = children[passedKeys];
+      console.log(target);
+      if (!(target as any).scrollIntoView) {
+        debugger;
+      }
+      (target as HTMLSpanElement).scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+        inline: 'center'
+      });
+    }
+  }
+
+  $: {
+    if (keys == null) {
+      passedKeys = 0;
+    } else {
+      passedKeys++;
+    }
+  }
 </script>
 
 <svelte:head>
@@ -30,11 +65,20 @@
     on:keydown={onFocusableKeyDown}
     on:focus={onFocusableFocus}
     on:blur={onFocusableBlur}
+    style="width: calc(var(--key-base-size) * {visibleKeysNo + 1} + var(--gap) * {visibleKeysNo});"
   >
     {#if error !== null}
       <p>Error: {error}</p>
     {:else if keys !== null}
-      <div>
+      <div
+        style="width: calc(var(--key-base-size) * {visibleKeysNo} + var(--gap) * {visibleKeysNo -
+          1});"
+      >
+        {#each endDumbKeys as _, index (index)}
+          <span class="key-wrapper">
+            <div class="mockedKeyBtn" />
+          </span>
+        {/each}
         {#each keys as key, idx}
           <span class="key-wrapper">
             <KeyBtn
@@ -46,6 +90,11 @@
             <div class="entries" title="{key.char}:&#013;{key.wrongEntries.join(', ')}">
               {key.wrongEntries.join(',')}
             </div>
+          </span>
+        {/each}
+        {#each endDumbKeys as _, index (index)}
+          <span class="key-wrapper">
+            <div class="mockedKeyBtn" />
           </span>
         {/each}
       </div>
@@ -64,12 +113,7 @@
     --gap: 1rem;
 
     position: relative;
-    overflow-y: hidden;
-    overflow-x: auto;
-    scroll-behavior: smooth;
     max-width: calc(10 * var(--key-base-size) + 9 * var(--gap) + 2 * 1rem);
-    /* at least space for 3 keys */
-    min-width: calc(3 * var(--key-base-size) + 2 * var(--gap) + 2 * 1rem + 2 * 20px);
     min-height: calc(var(--key-base-size) + 2 * 1rem);
 
     padding: 1rem;
@@ -78,9 +122,15 @@
     outline: none;
 
     font-family: 'Source Sans Pro';
+    /**/
+    overflow: hidden;
+    background-color: thistle;
   }
 
-  article:not(:focus)::after {
+  article:not(:focus) {
+    background-color: cadetblue;
+  }
+  /* article:not(:focus)::after {
     content: '';
     position: absolute;
     left: 0px;
@@ -88,14 +138,18 @@
     right: 0px;
     bottom: 0px;
     backdrop-filter: blur(0.12em);
-  }
+  } */
 
   article > div {
+    box-sizing: content-box;
     display: flex;
-    justify-content: center;
+    /* justify-content: center; */
     gap: var(--gap);
-    padding-bottom: 1rem;
+    padding: var(--gap);
     border-bottom: 2px solid var(--test-accent-color);
+    background: tomato;
+    scroll-behavior: smooth;
+    overflow-x: scroll;
   }
 
   .key-wrapper {
@@ -114,5 +168,11 @@
     bottom: -16px;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  .mockedKeyBtn {
+    height: var(--key-base-size);
+    width: var(--key-base-size);
+    border: 1px solid #222;
   }
 </style>

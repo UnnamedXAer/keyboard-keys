@@ -29,6 +29,10 @@
     });
   }
 
+  function generateRandomKeys(count: number = 10) {
+    return [...Array(count)].map(() => availableKeys[~~(availableKeys.length * Math.random())]);
+  }
+
   type Position = number | -1;
   let isStarted: boolean = false;
 
@@ -43,9 +47,7 @@
     metadata.stopActivePeriod();
     stats = metadata.getSingleKeysStats();
 
-    const randomKeys: AppKey[] = [...Array(3)].map(
-      () => availableKeys[~~(availableKeys.length * Math.random())]
-    );
+    const randomKeys: AppKey[] = generateRandomKeys(10);
     isStarted = false;
     keys = mapAppKeysToSingleKeys(randomKeys);
     metadata.totalKeys += keys.length;

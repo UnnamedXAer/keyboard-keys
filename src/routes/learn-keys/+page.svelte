@@ -146,6 +146,7 @@
     <KeysFields
       {error}
       {keys}
+      passedKeys={position}
       position={hasFocus ? position : null}
       onFocusableKeyDown={keyDownHandler}
       onFocusableFocus={focusHandler}

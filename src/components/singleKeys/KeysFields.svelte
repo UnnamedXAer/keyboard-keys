@@ -5,48 +5,30 @@
 
   export let keys: SingleKey[] | null;
   export let position: number | null = null;
+  export let passedKeys: number;
   export let error: String | null;
   export let onFocusableKeyDown: (event: KeyboardEvent) => void;
   export let onFocusableFocus: (event: FocusEvent) => void;
   export let onFocusableBlur: (event: FocusEvent) => void;
   let focusableElement: HTMLElement | undefined;
   let visibleKeysNo = 9; // keep it odd
-  let passedKeys = 0;
   let endDumbKeys = new Array((visibleKeysNo - 1) / 2);
-  // let keySize = 55 + 2;
 
   onMount(() => {
     focusableElement?.focus();
-
-    // const root = document.querySelector(':root')!;
-    // const styles = getComputedStyle(root);
-    // const btnSize = styles.getPropertyValue('--key-base-size');
-    // keySize = parseInt(btnSize) || keySize;
-    // console.log('---key size', keySize, btnSize);
   });
 
   $: {
-    if (focusableElement && keys !== null) {
+    if (focusableElement) {
       const children = (focusableElement.firstChild as HTMLDivElement).children;
       console.log(children);
-      const target = children[passedKeys];
-      console.log(target);
-      if (!(target as any).scrollIntoView) {
-        debugger;
-      }
+      const target = children[endDumbKeys.length + passedKeys];
+      console.log(target, target.innerHTML);
       (target as HTMLSpanElement).scrollIntoView({
         behavior: 'smooth',
         block: 'center',
-        inline: 'center'
+        inline: 'center',
       });
-    }
-  }
-
-  $: {
-    if (keys == null) {
-      passedKeys = 0;
-    } else {
-      passedKeys++;
     }
   }
 </script>
@@ -71,6 +53,7 @@
       <p>Error: {error}</p>
     {:else if keys !== null}
       <div
+        class="key-list"
         style="width: calc(var(--key-base-size) * {visibleKeysNo} + var(--gap) * {visibleKeysNo -
           1});"
       >
@@ -140,16 +123,15 @@
     backdrop-filter: blur(0.12em);
   } */
 
-  article > div {
+  .key-list {
     box-sizing: content-box;
     display: flex;
-    /* justify-content: center; */
     gap: var(--gap);
     padding: var(--gap);
     border-bottom: 2px solid var(--test-accent-color);
     background: tomato;
     scroll-behavior: smooth;
-    overflow-x: scroll;
+    overflow: auto;
   }
 
   .key-wrapper {

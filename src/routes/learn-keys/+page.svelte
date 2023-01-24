@@ -15,6 +15,7 @@
   import type { Stats } from '../../components/statistics';
   import { SingleKeysMetadata } from '../../helpers/singleKeysStats';
   import Navbar from '../../components/Navbar.svelte';
+  import type { OddNumber } from '../types';
 
   const availableKeys = stringToAppKeys('qwertyuiopasdfghjklzxcvbnm');
 
@@ -39,6 +40,7 @@
   let error: String | null = null;
   let keys: SingleKey[] = [];
   let position: Position = 0;
+  let visibleKeysNo: OddNumber<11> = 9;
   let hasFocus: boolean = false;
   let stats: Stats = {};
   let metadata = new SingleKeysMetadata();
@@ -68,7 +70,7 @@
       return;
     }
 
-    if (position === null || position === -1 || !hasFocus) {
+    if (position === -1 || !hasFocus) {
       return;
     }
 
@@ -134,7 +136,7 @@
       metadata.stopActivePeriod();
     }
   }
-  $: activeChars = keys.length ? [keys[position]] : [];
+  $: activeChars = hasFocus && keys.length ? [keys[position]] : [];
 </script>
 
 <Navbar />
@@ -146,8 +148,9 @@
     <KeysFields
       {error}
       {keys}
-      passedKeys={position}
-      position={hasFocus ? position : null}
+      {hasFocus}
+      {position}
+      {visibleKeysNo}
       onFocusableKeyDown={keyDownHandler}
       onFocusableFocus={focusHandler}
       onFocusableBlur={blurHandler}

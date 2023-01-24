@@ -3,27 +3,26 @@
   import { onMount } from 'svelte';
   import KeyBtn from '../KeyBtn.svelte';
 
+  export let hasFocus: boolean;
   export let keys: SingleKey[] | null;
   export let position: number | null = null;
-  export let passedKeys: number;
+  export let visibleKeysNo: number;
   export let error: String | null;
   export let onFocusableKeyDown: (event: KeyboardEvent) => void;
   export let onFocusableFocus: (event: FocusEvent) => void;
   export let onFocusableBlur: (event: FocusEvent) => void;
   let focusableElement: HTMLElement | undefined;
-  let visibleKeysNo = 9; // keep it odd
-  let endDumbKeys = new Array((visibleKeysNo - 1) / 2);
+  $: endDumbKeys = new Array((visibleKeysNo - 1) / 2);
 
   onMount(() => {
     focusableElement?.focus();
   });
 
   $: {
-    if (focusableElement) {
+    if (focusableElement && keys && position !== null) {
       const children = (focusableElement.firstChild as HTMLDivElement).children;
-      console.log(children);
-      const target = children[endDumbKeys.length + passedKeys];
-      console.log(target, target.innerHTML);
+      const target = children[endDumbKeys.length + position];
+
       (target as HTMLSpanElement).scrollIntoView({
         behavior: 'smooth',
         block: 'center',
@@ -31,6 +30,8 @@
       });
     }
   }
+
+  $: width = Math.min(visibleKeysNo, 11);
 </script>
 
 <svelte:head>
@@ -47,16 +48,12 @@
     on:keydown={onFocusableKeyDown}
     on:focus={onFocusableFocus}
     on:blur={onFocusableBlur}
-    style="width: calc(var(--key-base-size) * {visibleKeysNo + 1} + var(--gap) * {visibleKeysNo});"
+    style="width: calc(var(--key-base-size) * {width + 1} + var(--gap) * {width});"
   >
     {#if error !== null}
       <p>Error: {error}</p>
     {:else if keys !== null}
-      <div
-        class="key-list"
-        style="width: calc(var(--key-base-size) * {visibleKeysNo} + var(--gap) * {visibleKeysNo -
-          1});"
-      >
+      <div class="key-list">
         {#each endDumbKeys as _, index (index)}
           <span class="key-wrapper">
             <div class="mockedKeyBtn" />
@@ -67,7 +64,7 @@
             <KeyBtn
               key={key.appKey}
               state={key.state}
-              active={idx === position}
+              active={hasFocus && idx === position}
               fontSize="1.5rem"
             />
             <div class="entries" title="{key.char}:&#013;{key.wrongEntries.join(', ')}">
@@ -96,7 +93,7 @@
     --gap: 1rem;
 
     position: relative;
-    max-width: calc(10 * var(--key-base-size) + 9 * var(--gap) + 2 * 1rem);
+    max-width: 100%;
     min-height: calc(var(--key-base-size) + 2 * 1rem);
 
     padding: 1rem;
@@ -104,16 +101,12 @@
     user-select: none;
     outline: none;
 
-    font-family: 'Source Sans Pro';
-    /**/
+    /* font-family: 'Source Sans Pro'; */
+
     overflow: hidden;
-    background-color: thistle;
   }
 
-  article:not(:focus) {
-    background-color: cadetblue;
-  }
-  /* article:not(:focus)::after {
+  article:not(:focus)::after {
     content: '';
     position: absolute;
     left: 0px;
@@ -121,7 +114,7 @@
     right: 0px;
     bottom: 0px;
     backdrop-filter: blur(0.12em);
-  } */
+  }
 
   .key-list {
     box-sizing: content-box;
@@ -129,9 +122,8 @@
     gap: var(--gap);
     padding: var(--gap);
     border-bottom: 2px solid var(--test-accent-color);
-    background: tomato;
     scroll-behavior: smooth;
-    overflow: auto;
+    overflow: hidden;
   }
 
   .key-wrapper {
@@ -155,6 +147,5 @@
   .mockedKeyBtn {
     height: var(--key-base-size);
     width: var(--key-base-size);
-    border: 1px solid #222;
   }
 </style>

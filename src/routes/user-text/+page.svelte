@@ -134,8 +134,10 @@
 
 <style>
   main {
-    max-width: 1600px;
+    max-width: var(--max-width);
     min-width: var(--keyboard-width);
+    margin-left: auto;
+    margin-right: auto;
   }
   #controls {
     display: flex;

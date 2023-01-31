@@ -20,4 +20,10 @@
     gap: 1rem;
     font-size: 1.5rem;
   }
+
+  @media (max-width: 1200px) {
+    section {
+      font-size: 1.2rem;
+    }
+  }
 </style>

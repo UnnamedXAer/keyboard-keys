@@ -10,6 +10,9 @@
 
 <style>
   menu {
+    margin: 0 auto;
+    max-width: var(--max-width);
+    min-width: var(--keyboard-width);
     display: flex;
     align-items: stretch;
     list-style-type: none;

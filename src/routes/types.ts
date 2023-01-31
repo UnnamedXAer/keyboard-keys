@@ -6,3 +6,6 @@ export type OddNumber<
   Y extends unknown[] = [1],
   Z extends number = never
 > = Y['length'] extends X ? Z | Y['length'] : OddNumber<X, [1, 1, ...Y], Z | Y['length']>;
+
+
+export type KeyPosition = number | -1;

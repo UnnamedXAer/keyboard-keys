@@ -3,9 +3,10 @@
   import { onMount } from 'svelte';
   import KeyBtn from '../KeyBtn.svelte';
 
+  export let keysInTest: number;
   export let hasFocus: boolean;
   export let keys: SingleKey[] | null;
-  export let position: number | null = null;
+  export let position: number = -1;
   export let visibleKeysNo: number;
   export let error: String | null;
   export let onFocusableKeyDown: (event: KeyboardEvent) => void;
@@ -19,10 +20,9 @@
   });
 
   $: {
-    if (focusableElement && keys && position !== null) {
+    if (focusableElement && keys && position !== -1) {
       const children = (focusableElement.firstChild as HTMLDivElement).children;
       const target = children[endDumbKeys.length + position];
-
       (target as HTMLSpanElement).scrollIntoView({
         behavior: 'smooth',
         block: 'center',
@@ -78,6 +78,7 @@
           </span>
         {/each}
       </div>
+      <div style="margin: var(--gap) var(--gap) 0 0; text-align: end;">{position}/{keysInTest}</div>
     {:else}
       <p style="font-size: 2rem;">There were some problem, please try to refresh the page.</p>
     {/if}

@@ -15,7 +15,7 @@
   import type { Stats } from '../../components/statistics';
   import { SingleKeysMetadata } from '../../helpers/singleKeysStats';
   import Navbar from '../../components/Navbar.svelte';
-  import type { OddNumber } from '../types';
+  import type { KeyPosition, OddNumber } from '../types';
 
   const availableKeys = stringToAppKeys('qwertyuiopasdfghjklzxcvbnm');
 
@@ -30,17 +30,22 @@
     });
   }
 
-  function generateRandomKeys(count: number = 10) {
+  function generateRandomAppKeys(count: number) {
     return [...Array(count)].map(() => availableKeys[~~(availableKeys.length * Math.random())]);
   }
 
-  type Position = number | -1;
-  let isStarted: boolean = false;
+  function generateKeys(count: number) {
+    const randomKeys: AppKey[] = generateRandomAppKeys(count);
+    return mapAppKeysToSingleKeys(randomKeys);
+  }
 
+  const MAX_KEYS_IN_TEST = 100;
+  const KEYS_NUMBER_TO_GENERATE = 30;
+  let isStarted: boolean = false;
   let error: String | null = null;
   let keys: SingleKey[] = [];
-  let position: Position = 0;
-  let visibleKeysNo: OddNumber<11> = 9;
+  let position: KeyPosition = 0;
+  let visibleKeysNo: OddNumber<11> = 11;
   let hasFocus: boolean = false;
   let stats: Stats = {};
   let metadata = new SingleKeysMetadata();
@@ -49,10 +54,8 @@
     metadata.stopActivePeriod();
     stats = metadata.getSingleKeysStats();
 
-    const randomKeys: AppKey[] = generateRandomKeys(10);
+    keys = generateKeys(KEYS_NUMBER_TO_GENERATE);
     isStarted = false;
-    keys = mapAppKeysToSingleKeys(randomKeys);
-    metadata.totalKeys += keys.length;
     position = 0;
   }
   updateKeys();
@@ -60,7 +63,10 @@
   function updatePosition() {
     position = findNextKeyPosition(keys);
     if (position === -1) {
+      metadata.totalKeys += keys.length;
       updateKeys();
+    } else {
+      addKeysIfNecessary();
     }
   }
 
@@ -88,6 +94,19 @@
     }
 
     updatePosition();
+  }
+
+  function addKeysIfNecessary() {
+    const currentKeysLen = keys.length;
+    if (currentKeysLen - position < KEYS_NUMBER_TO_GENERATE) {
+      let keysNoToGenerate = KEYS_NUMBER_TO_GENERATE;
+      if (currentKeysLen + keysNoToGenerate > MAX_KEYS_IN_TEST) {
+        keysNoToGenerate = MAX_KEYS_IN_TEST - currentKeysLen;
+      }
+      if (keysNoToGenerate > 0) {
+        keys = keys.concat(generateKeys(keysNoToGenerate));
+      }
+    }
   }
 
   function updateKeysState(position: number, key: string, keyCode: number) {
@@ -149,6 +168,7 @@
       {error}
       {keys}
       {hasFocus}
+      keysInTest={MAX_KEYS_IN_TEST}
       {position}
       {visibleKeysNo}
       onFocusableKeyDown={keyDownHandler}

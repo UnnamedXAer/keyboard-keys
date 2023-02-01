@@ -6,8 +6,8 @@ export type PhraseRaw = { text: string; author: string };
 export type Phrase = TextChar[][];
 export type Content = { phrase: Phrase; author: string };
 
-const MIN_LENGTH = 10;
-const MAX_LENGTH = 80;
+const MIN_LENGTH = 20;
+const MAX_LENGTH = 150;
 const PAGE_SIZE = 3;
 
 export function parseText(content: string, settings: Settings): Phrase | null {

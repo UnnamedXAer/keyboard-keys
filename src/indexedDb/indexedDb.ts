@@ -39,19 +39,19 @@ export class LocalDb {
       const requestOpenDb = indexedDB.open(this.dbName, this.version);
 
       requestOpenDb.onupgradeneeded = (ev) => {
-        const v1 = (db: IDBDatabase) => {
+        const v0 = (db: IDBDatabase) => {
           db.createObjectStore(this.phraseSummaryStoreName, {
             keyPath: 'createdAt' satisfies keyof PhraseTestSummary,
           });
         };
 
-        const v2 = (db: IDBDatabase) => {
+        const v1 = (db: IDBDatabase) => {
           db.createObjectStore(this.userTextStoreName, {
             autoIncrement: true,
           });
         };
 
-        const v3 = (db: IDBDatabase) => {
+        const v2 = (db: IDBDatabase) => {
           db.createObjectStore(this.settingsStoreName, {
             autoIncrement: false,
           });
@@ -59,15 +59,15 @@ export class LocalDb {
 
         const db = requestOpenDb.result;
         // debugger;
-        switch (db.version) {
+        switch (ev.oldVersion) {
+          case 0:
+            v0(db);
+          // eslint-disable-next-line no-fallthrough
           case 1:
             v1(db);
           // eslint-disable-next-line no-fallthrough
           case 2:
             v2(db);
-          // eslint-disable-next-line no-fallthrough
-          case 3:
-            v3(db);
         }
       };
 
@@ -319,9 +319,6 @@ export class LocalDb {
       };
 
       request.onsuccess = (ev) => {
-        if (request.result) {
-          debugger;
-        }
         const settings = new Settings((request.result as Nullable<Partial<Settings>>) || {});
         resolve(settings);
       };

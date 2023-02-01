@@ -4,6 +4,6 @@ export class Settings {
 
   constructor({ useMyTexts, allowCapitalLetters }: Partial<Settings> = {}) {
     this.useMyTexts = useMyTexts || false;
-    this.allowCapitalLetters = allowCapitalLetters || false;
+    this.allowCapitalLetters = allowCapitalLetters || true;
   }
 }

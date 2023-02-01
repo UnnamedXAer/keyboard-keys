@@ -182,7 +182,9 @@
         const updatedState = wasWrong ? CharState.backspacedWrong : CharState.untouched;
         phrase![position.wordIdx][position.charIdx - 1].state = updatedState;
 
-        // TODO: did we miss `currentMetadata.totalCorrectEntriesCnt+/-; here?
+        if (oldState === CharState.correct || oldState === CharState.corrected) {
+          currentMetadata.totalCorrectEntriesCnt--;
+        }
         return;
       }
 
@@ -191,8 +193,7 @@
           phrase![position.wordIdx - 1][phrase![position.wordIdx - 1].length - 1].state;
 
         if (oldState === CharState.correct || oldState === CharState.corrected) {
-          // TODO: is this correct? shouldn't it be -1?
-          currentMetadata.totalCorrectEntriesCnt++;
+          currentMetadata.totalCorrectEntriesCnt--;
         }
 
         const wasWrong = oldState === CharState.wrong || oldState === CharState.corrected;

@@ -9,7 +9,6 @@
     saveMyText,
     updateMyText,
   } from '../../helpers/userText';
-  import { LocalDb } from '../../indexedDb/indexedDb';
   import { Settings } from '../../models/settings';
   import type { UserText } from '../../models/userText';
 
@@ -19,11 +18,18 @@
   let newText = '';
   let editKey = -1;
   let settings = new Settings();
+  let settingsError: string | null = null;
+  let textsError: string | null = null;
 
   onMount(async () => {
     updateProgress();
     readSettings();
-    texts = await getMyTexts();
+    try {
+      texts = await getMyTexts();
+    } catch (err) {
+      textsError = settingsError ? null : 'Sorry could not load your texts.';
+      console.log('read my texts: ', err);
+    }
     isLoading = false;
   });
 
@@ -31,6 +37,7 @@
     try {
       settings = await getSettings();
     } catch (err) {
+      settingsError = 'Sorry, could not load settings.';
       console.log('read settings: ', err);
     }
   }
@@ -85,6 +92,8 @@
       clearHandler();
     }
   }
+
+  $: disabled = !!(settingsError || textsError);
 </script>
 
 <Navbar />
@@ -102,17 +111,21 @@
           rows="4"
           minlength="10"
           required
-          disabled={isLoading}
+          disabled={isLoading || disabled}
         />
       </label>
-      <button type="submit" disabled={isLoading}>{editKey > -1 ? '💾 Update' : '💾 Save'}</button>
-      <button type="reset" on:click|preventDefault={clearHandler} disabled={isLoading}
+      <button type="submit" disabled={isLoading || disabled}
+        >{editKey > -1 ? '💾 Update' : '💾 Save'}</button
+      >
+      <button type="reset" on:click|preventDefault={clearHandler} disabled={isLoading || disabled}
         >🧹 Clear</button
       >
     </form>
   </section>
   <section id="parahraphs">
-    {#if isLoading}
+    {#if settingsError || textsError}
+      <p>Error: {settingsError || textsError}</p>
+    {:else if isLoading}
       <progress value={progress} />
     {:else}
       <ol>

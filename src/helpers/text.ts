@@ -87,7 +87,7 @@ export async function getRandomPhrase(
     author: data.author as string,
   };
   }catch(err){
-    console.log("FAILED TO FETCH QUOTE: " + err);
+    // console.log("FAILED TO FETCH QUOTE: " + err);
     return null;
   }
 }

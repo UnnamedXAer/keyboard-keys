@@ -74,6 +74,8 @@ export async function getRandomPhrase(
   fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>
 ): Promise<PhraseRaw | null> {
   const url = `https://api.quotable.io/random?minLength=${MIN_LENGTH}&maxLength=${MAX_LENGTH}`;
+  try {
+
   const res = await fetch(url);
   if (!res.ok) {
     return null;
@@ -84,6 +86,10 @@ export async function getRandomPhrase(
     text: data.content as string,
     author: data.author as string,
   };
+  }catch(err){
+    console.log("FAILED TO FETCH QUOTE: " + err);
+    return null;
+  }
 }
 
 export function rawPhraseToContent(data: PhraseRaw | null, settings: Settings): Content | null {
